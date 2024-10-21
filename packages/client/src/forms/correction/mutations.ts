@@ -11,51 +11,28 @@
 import { gql } from '@apollo/client'
 
 export const CREATE_BIRTH_REG_CORRECTION = gql`
-  mutation createBirthRegistrationCorrection(
-    $id: ID!
-    $details: BirthRegistrationInput!
-  ) {
-    createBirthRegistrationCorrection(id: $id, details: $details)
+  mutation createEventCorrection($id: ID!, $details: EventInput!) {
+    createEventCorrection(id: $id, details: $details)
   }
 `
 
-export const CREATE_DEATH_REG_CORRECTION = gql`
-  mutation createDeathRegistrationCorrection(
-    $id: ID!
-    $details: DeathRegistrationInput!
-  ) {
-    createDeathRegistrationCorrection(id: $id, details: $details)
-  }
-`
 export const APPROVE_BIRTH_REG_CORRECTION = gql`
-  mutation approveBirthRegistrationCorrection(
-    $id: ID!
-    $details: BirthRegistrationInput!
-  ) {
-    approveBirthRegistrationCorrection(id: $id, details: $details)
-  }
-`
-
-export const APPROVE_DEATH_REG_CORRECTION = gql`
-  mutation approveDeathRegistrationCorrection(
-    $id: ID!
-    $details: DeathRegistrationInput!
-  ) {
-    approveDeathRegistrationCorrection(id: $id, details: $details)
+  mutation approveEventCorrection($id: ID!, $details: EventInput!) {
+    approveEventCorrection(id: $id, details: $details)
   }
 `
 
 export const REQUEST_REG_CORRECTION = gql`
-  mutation requestRegistrationCorrection($id: ID!, $details: CorrectionInput!) {
-    requestRegistrationCorrection(id: $id, details: $details)
+  mutation requestEventCorrection($id: ID!, $details: CorrectionInput!) {
+    requestEventCorrection(id: $id, details: $details)
   }
 `
 
 export const REJECT_REG_CORRECTION = gql`
-  mutation rejectRegistrationCorrection(
+  mutation rejectEventCorrection(
     $id: ID!
     $details: CorrectionRejectionInput!
   ) {
-    rejectRegistrationCorrection(id: $id, details: $details)
+    rejectEventCorrection(id: $id, details: $details)
   }
 `

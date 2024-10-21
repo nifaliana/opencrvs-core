@@ -14,61 +14,15 @@ const EVENT_SEARCH_RESULT_FIELDS = gql`
   fragment EventSearchFields on EventSearchSet {
     id
     type
-    registration {
-      status
-      contactRelationship
-      contactNumber
-      trackingId
-      eventLocationId
-      registrationNumber
-      registeredLocationId
-      duplicates
-      createdAt
-      modifiedAt
-      assignment {
-        practitionerId
-        firstName
-        lastName
-        officeName
-        avatarURL
-      }
-    }
-    operationHistories {
-      operationType
-      operatedOn
-    }
-    ... on BirthEventSearchSet {
-      dateOfBirth
-      childName {
-        firstNames
-        middleName
-        familyName
-        use
-      }
-    }
-    ... on DeathEventSearchSet {
-      dateOfDeath
-      deceasedName {
-        firstNames
-        middleName
-        familyName
-        use
-      }
-    }
-    ... on MarriageEventSearchSet {
-      dateOfMarriage
-      brideName {
-        firstNames
-        middleName
-        familyName
-        use
-      }
-      groomName {
-        firstNames
-        middleName
-        familyName
-        use
-      }
+    status
+    createdAt
+    modifiedAt
+    assignedTo {
+      practitionerId
+      firstName
+      lastName
+      officeName
+      avatarURL
     }
   }
 `

@@ -12,67 +12,12 @@ import { gql } from '@apollo/client'
 
 export const FETCH_DECLARATION_SHORT_INFO = gql`
   query fetchDeclarationShortInfo($id: ID!) {
-    fetchRegistration(id: $id) {
+    fetchEvent(id: $id) {
       id
-      registration {
-        id
-        type
-        trackingId
-        status {
-          type
-        }
-        duplicates {
-          compositionId
-          trackingId
-        }
-        assignment {
-          practitionerId
-          firstName
-          lastName
-          officeName
-          avatarURL
-        }
-      }
-      ... on BirthRegistration {
-        child {
-          id
-          name {
-            use
-            firstNames
-            middleName
-            familyName
-          }
-        }
-      }
-      ... on DeathRegistration {
-        deceased {
-          id
-          name {
-            use
-            firstNames
-            middleName
-            familyName
-          }
-        }
-      }
-      ... on MarriageRegistration {
-        bride {
-          id
-          name {
-            use
-            firstNames
-            middleName
-            familyName
-          }
-        }
-        groom {
-          id
-          name {
-            use
-            firstNames
-            middleName
-            familyName
-          }
+      actions {
+        fields {
+          fieldId
+          value
         }
       }
     }

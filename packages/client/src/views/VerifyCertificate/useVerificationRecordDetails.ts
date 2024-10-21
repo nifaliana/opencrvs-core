@@ -14,104 +14,13 @@ import { FetchRecordDetailsForVerificationQuery } from '@client/utils/gateway'
 import { useParams } from 'react-router'
 
 const FETCH_RECORD_DETAILS_FOR_VERIFICATION = gql`
-  query fetchRecordDetailsForVerification($id: String!) {
-    fetchRecordDetailsForVerification(id: $id) {
-      ... on BirthRegistration {
-        id
-        child {
-          name {
-            firstNames
-            familyName
-          }
-          birthDate
-          gender
-        }
-        eventLocation {
-          id
-          name
-          description
-          type
-          address {
-            district
-            state
-            city
-            country
-            line
-          }
-        }
-        registration {
-          trackingId
-          registrationNumber
-          type
-        }
-        createdAt
-        history {
-          action
-          regStatus
-          date
-          user {
-            primaryOffice {
-              hierarchy {
-                id
-                name
-                alias
-              }
-            }
-            name {
-              firstNames
-              familyName
-            }
-          }
-        }
-      }
-      ... on DeathRegistration {
-        id
-        deceased {
-          name {
-            firstNames
-            familyName
-          }
-          birthDate
-          gender
-          deceased {
-            deathDate
-          }
-        }
-        eventLocation {
-          id
-          name
-          description
-          type
-          address {
-            district
-            state
-            city
-            country
-          }
-        }
-        registration {
-          trackingId
-          registrationNumber
-          type
-        }
-        createdAt
-        history {
-          action
-          regStatus
-          date
-          user {
-            primaryOffice {
-              hierarchy {
-                id
-                name
-                alias
-              }
-            }
-            name {
-              firstNames
-              familyName
-            }
-          }
+  query fetchRecordDetailsForVerification($id: ID!) {
+    fetchEvent(id: $id) {
+      id
+      actions {
+        fields {
+          fieldId
+          value
         }
       }
     }

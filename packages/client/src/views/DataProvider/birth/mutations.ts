@@ -18,8 +18,8 @@ import {
 import { SubmissionAction } from '@client/forms'
 
 const SUBMIT_BIRTH_DECLARATION = gql`
-  mutation createBirthRegistration($details: BirthRegistrationInput!) {
-    createBirthRegistration(details: $details) {
+  mutation createEvent($details: EventInput!) {
+    createEvent(details: $details) {
       trackingId
       compositionId
       isPotentiallyDuplicate
@@ -27,28 +27,24 @@ const SUBMIT_BIRTH_DECLARATION = gql`
   }
 `
 const APPROVE_BIRTH_DECLARATION = gql`
-  mutation markBirthAsValidated($id: ID!, $details: BirthRegistrationInput!) {
-    markBirthAsValidated(id: $id, details: $details)
+  mutation markEventAsValidated($id: ID!, $details: EventInput!) {
+    markEventAsValidated(id: $id, details: $details)
   }
 `
 const REGISTER_BIRTH_DECLARATION = gql`
-  mutation markBirthAsRegistered($id: ID!, $details: BirthRegistrationInput!) {
-    markBirthAsRegistered(id: $id, details: $details)
+  mutation markEventAsRegistered($id: ID!, $details: EventInput!) {
+    markEventAsRegistered(id: $id, details: $details)
   }
 `
 const REJECT_BIRTH_DECLARATION = gql`
-  mutation markEventAsVoided(
-    $id: String!
-    $reason: String!
-    $comment: String!
-  ) {
+  mutation markEventAsVoided($id: ID!, $reason: String!, $comment: String!) {
     markEventAsVoided(id: $id, reason: $reason, comment: $comment)
   }
 `
 
 const ARCHIVE_BIRTH_DECLARATION = gql`
   mutation markEventAsArchived(
-    $id: String!
+    $id: ID!
     $reason: String
     $comment: String
     $duplicateTrackingId: String
@@ -63,26 +59,28 @@ const ARCHIVE_BIRTH_DECLARATION = gql`
 `
 
 const COLLECT_BIRTH_CERTIFICATE = gql`
-  mutation markBirthAsCertified($id: ID!, $details: BirthRegistrationInput!) {
-    markBirthAsCertified(id: $id, details: $details)
+  mutation markEventAsCertified($id: ID!, $details: EventInput!) {
+    markEventAsCertified(id: $id, details: $details)
   }
 `
 
 const ISSUE_BIRTH_CERTIFICATE = gql`
-  mutation markBirthAsIssued($id: ID!, $details: BirthRegistrationInput!) {
-    markBirthAsIssued(id: $id, details: $details)
+  mutation markEventAsIssued($id: ID!, $details: EventInput!) {
+    markEventAsIssued(id: $id, details: $details)
   }
 `
 
 export const MARK_EVENT_UNASSIGNED = gql`
-  mutation submitMutation($id: String!) {
-    markEventAsUnassigned(id: $id)
+  mutation submitMutation($id: ID!) {
+    markEventAsUnassigned(id: $id) {
+      id
+    }
   }
 `
 
 export const MARK_EVENT_AS_DUPLICATE = gql`
   mutation markEventAsDuplicate(
-    $id: String!
+    $id: ID!
     $reason: String!
     $comment: String
     $duplicateTrackingId: String

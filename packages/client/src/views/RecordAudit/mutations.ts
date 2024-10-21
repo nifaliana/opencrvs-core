@@ -11,7 +11,7 @@
 import { gql } from '@apollo/client'
 
 export const REINSTATE_BIRTH_DECLARATION = gql`
-  mutation markEventAsReinstated($id: String!) {
+  mutation markEventAsReinstated($id: ID!) {
     markEventAsReinstated(id: $id) {
       taskEntryResourceID
       registrationStatus
@@ -20,7 +20,7 @@ export const REINSTATE_BIRTH_DECLARATION = gql`
 `
 
 export const REINSTATE_DEATH_DECLARATION = gql`
-  mutation markEventAsReinstated($id: String!) {
+  mutation markEventAsReinstated($id: ID!) {
     markEventAsReinstated(id: $id) {
       taskEntryResourceID
       registrationStatus

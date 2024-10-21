@@ -12,7 +12,7 @@
 import { gql } from '@apollo/client'
 
 export const NOT_A_DUPLICATE = gql`
-  mutation markEventAsNotDuplicate($id: String!) {
+  mutation markEventAsNotDuplicate($id: ID!) {
     markEventAsNotDuplicate(id: $id)
   }
 `

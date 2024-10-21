@@ -84,7 +84,7 @@ export const createStore = <T>(
   const history = existingHistory || createBrowserHistory()
   const reducers = combineReducers<IStoreState>({
     profile: profileReducer,
-    router: connectRouter(history) as any, // @todo
+    router: connectRouter(history) as any,
     i18n: intlReducer,
     declarationsState: declarationsReducer,
     registerForm: registerFormReducer,
