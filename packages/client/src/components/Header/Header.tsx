@@ -128,7 +128,7 @@ const USERS_WITHOUT_SEARCH = SYS_ADMIN_ROLES.concat(
   PERFORMANCE_MANAGEMENT_ROLES
 )
 
-export const HeaderComponent = (props: IFullProps) => {
+const HeaderComponent = (props: IFullProps) => {
   const {
     location,
     userDetails,

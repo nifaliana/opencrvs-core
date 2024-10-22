@@ -8,12 +8,14 @@
  *
  * Copyright (C) The OpenCRVS Authors located at https://github.com/opencrvs/opencrvs-core/blob/master/AUTHORS.
  */
-import { IForm, IFormSectionData, ISelectOption } from '@client/forms'
+import { ApolloClient, ApolloError, ApolloQueryResult } from '@apollo/client'
+
+import { roleQueries } from '@client/forms/user/query/queries'
 import { goToTeamUserList } from '@client/navigation'
 import {
   ShowCreateUserDuplicateEmailErrorToast,
-  ShowCreateUserErrorToast,
   showCreateUserDuplicateEmailErrorToast,
+  ShowCreateUserErrorToast,
   showCreateUserErrorToast,
   showSubmitFormErrorToast,
   showSubmitFormSuccessToast
@@ -22,19 +24,15 @@ import * as offlineActions from '@client/offline/actions'
 import * as profileActions from '@client/profile/profileActions'
 import { modifyUserDetails } from '@client/profile/profileActions'
 import { SEARCH_USERS } from '@client/user/queries'
-import { ApolloClient, ApolloError, ApolloQueryResult } from '@apollo/client'
-import { Action } from 'redux'
-import { ActionCmd, Cmd, Loop, loop, LoopReducer, RunCmd } from 'redux-loop'
-import { IUserAuditForm, userAuditForm } from '@client/user/user-audit'
+
 import { getToken, getTokenPayload } from '@client/utils/authUtils'
-import { roleQueries } from '@client/forms/user/query/queries'
 import { Role, SystemRole } from '@client/utils/gateway'
 import type { GQLQuery } from '@client/utils/gateway-deprecated-do-not-use'
-
-import { getUserRoleIntlKey } from '@client/views/SysAdmin/Team/utils'
+import { Action } from 'redux'
+import { ActionCmd, Cmd, Loop, loop, LoopReducer, RunCmd } from 'redux-loop'
 
 export const ROLES_LOADED = 'USER_FORM/ROLES_LOADED'
-const MODIFY_USER_FORM_DATA = 'USER_FORM/MODIFY_USER_FORM_DATA'
+
 const CLEAR_USER_FORM_DATA = 'USER_FORM/CLEAR_USER_FORM_DATA' as const
 const SUBMIT_USER_FORM_DATA = 'USER_FORM/SUBMIT_USER_FORM_DATA'
 const SUBMIT_USER_FORM_DATA_SUCCESS = 'USER_FORM/SUBMIT_USER_FORM_DATA_SUCCESS'
@@ -54,7 +52,6 @@ const initialState: IUserFormState = {
   submitting: false,
   loadingRoles: false,
   submissionError: false,
-  userAuditForm,
   systemRoleMap: {}
 }
 
@@ -65,24 +62,6 @@ export interface IRoleMessagesLoadedAction {
 export function rolesMessageAddData(): IRoleMessagesLoadedAction {
   return {
     type: ROLE_MESSAGES_LOADED
-  }
-}
-
-interface IUserFormDataModifyAction {
-  type: typeof MODIFY_USER_FORM_DATA
-  payload: {
-    data: IFormSectionData
-  }
-}
-
-export function modifyUserFormData(
-  data: IFormSectionData
-): IUserFormDataModifyAction {
-  return {
-    type: MODIFY_USER_FORM_DATA,
-    payload: {
-      data
-    }
   }
 }
 
@@ -97,26 +76,7 @@ interface IUserFormDataSubmitAction {
   }
 }
 
-export function submitUserFormData(
-  client: ApolloClient<unknown>,
-  mutation: any,
-  variables: { [key: string]: any },
-  officeLocationId: string,
-  isUpdate = false
-): IUserFormDataSubmitAction {
-  return {
-    type: SUBMIT_USER_FORM_DATA,
-    payload: {
-      client,
-      mutation,
-      variables,
-      officeLocationId,
-      isUpdate
-    }
-  }
-}
-
-export function clearUserFormData() {
+function clearUserFormData() {
   return {
     type: CLEAR_USER_FORM_DATA
   }
@@ -166,7 +126,7 @@ export interface IRoleLoadedAction {
   }
 }
 
-export function rolesLoaded(systemRoles: SystemRole[]): IRoleLoadedAction {
+function rolesLoaded(systemRoles: SystemRole[]): IRoleLoadedAction {
   return {
     type: ROLES_LOADED,
     payload: {
@@ -181,21 +141,6 @@ interface IFetchAndStoreUserData {
     client: ApolloClient<unknown>
     query: any
     variables: { userId: string }
-  }
-}
-
-export function fetchAndStoreUserData(
-  client: ApolloClient<unknown>,
-  query: any,
-  variables: { userId: string }
-): IFetchAndStoreUserData {
-  return {
-    type: FETCH_USER_DATA,
-    payload: {
-      client,
-      query,
-      variables
-    }
   }
 }
 
@@ -218,7 +163,6 @@ function storeUserFormData(
 }
 
 type UserFormAction =
-  | IUserFormDataModifyAction
   | IUserFormDataSubmitAction
   | ISubmitSuccessAction
   | ISubmitFailedAction
@@ -233,7 +177,7 @@ type UserFormAction =
   | ReturnType<typeof showSubmitFormSuccessToast>
   | ReturnType<typeof showSubmitFormErrorToast>
 
-export interface ISystemRolesMap {
+interface ISystemRolesMap {
   [key: string]: string
 }
 export interface IUserFormState {
@@ -241,7 +185,6 @@ export interface IUserFormState {
   submitting: boolean
   loadingRoles: boolean
   submissionError: boolean
-  userAuditForm: IUserAuditForm
   systemRoleMap: ISystemRolesMap
 }
 
@@ -261,20 +204,6 @@ const getRoleWiseSystemRoles = (systemRoles: SystemRole[]) => {
   return roleMap
 }
 
-const generateIntlObject = (
-  systemRole: SystemRole,
-  role: Role
-): ISelectOption => {
-  return {
-    value: role._id,
-    label: {
-      id: getUserRoleIntlKey(role._id),
-      description: '',
-      defaultMessage: role.labels[0].label
-    }
-  }
-}
-
 export const userFormReducer: LoopReducer<IUserFormState, UserFormAction> = (
   state: IUserFormState = initialState,
   action: UserFormAction | offlineActions.Action
@@ -284,21 +213,12 @@ export const userFormReducer: LoopReducer<IUserFormState, UserFormAction> = (
       return loop(
         {
           ...state,
-          userAuditForm,
           loadingRoles: true
         },
         Cmd.run(fetchRoles, {
           successActionCreator: rolesLoaded
         })
       )
-
-    case MODIFY_USER_FORM_DATA:
-      // @todo
-      return state
-
-    case CLEAR_USER_FORM_DATA:
-      // @todo
-      return state
 
     case SUBMIT_USER_FORM_DATA:
       const { client, mutation, variables, officeLocationId, isUpdate } = (

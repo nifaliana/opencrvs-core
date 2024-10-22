@@ -56,8 +56,6 @@ export function getUserRole(lang: string, role: Role) {
   return label?.label || defaultLabel?.label
 }
 
-export type RolesInput = (Omit<Role, '_id'> & { _id?: string })[]
+type RolesInput = (Omit<Role, '_id'> & { _id?: string })[]
 
-export type ISystemRole = NonNullable<
-  GetSystemRolesQuery['getSystemRoles']
->[number]
+type ISystemRole = NonNullable<GetSystemRolesQuery['getSystemRoles']>[number]

@@ -43,9 +43,8 @@ import { injectIntl, WrappedComponentProps as IntlShapeProps } from 'react-intl'
 import { connect } from 'react-redux'
 import { RouteComponentProps } from 'react-router'
 import styled from 'styled-components'
-import { SELECTOR_ID } from './inProgress/InProgress'
 
-export const StyledSpinner = styled(Spinner)`
+const StyledSpinner = styled(Spinner)`
   margin: 20% auto;
 `
 

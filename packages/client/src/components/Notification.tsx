@@ -85,7 +85,6 @@ const Component = ({
   saveDraftClicked,
   submitFormSuccessToast,
   submitFormErrorToast,
-  userAuditSuccessToast,
   showPINUpdateSuccess,
   showDuplicateRecordsToast,
   duplicateTrackingId,
@@ -165,18 +164,7 @@ const Component = ({
           {userFormSubmitErrorMessage}
         </Toast>
       )}
-      {userAuditSuccessToast.visible && (
-        <Toast
-          id="userAuditSuccessToast"
-          type="success"
-          onClose={hideUserAuditSuccessToast}
-        >
-          {intl.formatMessage(messages.userAuditSuccess, {
-            name: userAuditSuccessToast.userFullName,
-            action: userAuditSuccessToast.action
-          })}
-        </Toast>
-      )}
+
       {showPINUpdateSuccess && (
         <Toast
           id="PINUpdateSuccessToast"
@@ -296,7 +284,6 @@ const mapStateToProps = (store: IStoreState) => {
     saveDraftClicked: store.notification.saveDraftClicked,
     submitFormSuccessToast: store.notification.submitFormSuccessToast,
     submitFormErrorToast: store.notification.submitFormErrorToast,
-    userAuditSuccessToast: store.notification.userAuditSuccessToast,
     showPINUpdateSuccess: store.notification.showPINUpdateSuccess,
     showDuplicateRecordsToast: store.notification.showDuplicateRecordsToast,
     duplicateCompositionId: store.notification.duplicateCompositionId,
