@@ -40,6 +40,13 @@ enum PaymentType {
   MANUAL
 }
 
+# @todo
+enum Event {
+  birth
+  death
+  marriage
+}
+
 enum PaymentOutcomeType {
   COMPLETED
   ERROR
@@ -132,7 +139,7 @@ type IntegratedSystem {
   type: String
 }
 
-type Event {
+type EventData {
   id: ID!
   type: String!
   createdAt: String!
@@ -143,7 +150,7 @@ type Field {
   value: String!
 }
 type Action {
-  type: String!
+  type: RegAction!
   createdBy: String!
   createdAt: String!
   createdAtLocation: String!
@@ -214,7 +221,7 @@ type Attachment { # -> DocumentReference
 }
 
 type EventResultSet {
-  results: [Event]
+  results: [EventData]
   totalItems: Int
 }
 
@@ -224,7 +231,7 @@ type DeathRegResultSet {
 }
 
 type EventRegResultSet {
-  results: [Event]
+  results: [EventData]
   totalItems: Int
 }
 
@@ -259,13 +266,13 @@ type Reinstated {
 }
 
 type Query {
-  fetchEvent(id: ID!): Event
+  fetchEvent(id: ID!): EventData
   fetchRegistrationCountByStatus(
     status: [String]!
     locationId: String
-    event: String
+    event: Event
   ): RegistrationCountResult
-  fetchRecordDetailsForVerification(id: String!): Event
+  fetchRecordDetailsForVerification(id: String!): EventData
 }
 
 # import Mutation.* from 'correction.graphql'
@@ -273,8 +280,8 @@ type Query {
 type Mutation {
   createEvent(details: EventInput!): CreatedIds!
   # process transitions
-  markEventAsUnassigned(id: ID!): Event
-  markEventAsVerified(id: ID!, details: EventInput!): Event # updates status to 'verified' + audit? - attachments are valid and in order, ready for registration - internally call update if details exists
+  markEventAsUnassigned(id: ID!): EventData
+  markEventAsVerified(id: ID!, details: EventInput!): EventData # updates status to 'verified' + audit? - attachments are valid and in order, ready for registration - internally call update if details exists
   markEventAsValidated(id: ID!, details: EventInput!): ID # updates status to 'validated' - registration agent has validated the declaration
   markEventAsRegistered(id: ID!, details: EventInput!): ID! # updates status to 'registered' - registration clerk has accepted the declaration, it is now official - internally call update if details exists
   markEventAsCertified(id: ID!, details: EventInput!): ID! # updates status to 'certified' - a printed certificate has been produced - internally call update if details exists

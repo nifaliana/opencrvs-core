@@ -8,6 +8,20 @@
  *
  * Copyright (C) The OpenCRVS Authors located at https://github.com/opencrvs/opencrvs-core/blob/master/AUTHORS.
  */
+import { DownloadButton } from '@client/components/interface/DownloadButton'
+import {
+  DOWNLOAD_STATUS,
+  IDeclaration,
+  SUBMISSION_STATUS
+} from '@client/declarations'
+import { DownloadAction } from '@client/forms'
+import {
+  constantsMessages,
+  dynamicConstantsMessages,
+  wqMessages
+} from '@client/i18n/messages'
+import { navigationMessages } from '@client/i18n/messages/views/navigation'
+import { messages } from '@client/i18n/messages/views/registrarHome'
 import { goToDeclarationRecordAudit, goToPage } from '@client/navigation'
 import {
   REVIEW_CORRECTION,
@@ -16,44 +30,14 @@ import {
 import { getScope } from '@client/profile/profileSelectors'
 import { transformData } from '@client/search/transformer'
 import { IStoreState } from '@client/store'
-import { ITheme } from '@opencrvs/components/lib/theme'
-import { Scope, hasRegisterScope } from '@client/utils/authUtils'
-import {
-  ColumnContentAlignment,
-  Workqueue,
-  COLUMNS,
-  SORT_ORDER,
-  IAction
-} from '@opencrvs/components/lib/Workqueue'
-import type { GQLEventSearchResultSet } from '@client/utils/gateway-deprecated-do-not-use'
-import React, { useState } from 'react'
-import { injectIntl, WrappedComponentProps as IntlShapeProps } from 'react-intl'
-import { connect } from 'react-redux'
-import ReactTooltip from 'react-tooltip'
-import {
-  constantsMessages,
-  dynamicConstantsMessages,
-  wqMessages
-} from '@client/i18n/messages'
-import { messages } from '@client/i18n/messages/views/registrarHome'
-import {
-  IDeclaration,
-  DOWNLOAD_STATUS,
-  SUBMISSION_STATUS
-} from '@client/declarations'
-import { DownloadAction } from '@client/forms'
-import { DownloadButton } from '@client/components/interface/DownloadButton'
-import styled, { withTheme } from 'styled-components'
-import {
-  formattedDuration,
-  plainDateToLocalDate
-} from '@client/utils/date-formatting'
-import { navigationMessages } from '@client/i18n/messages/views/navigation'
+import { hasRegisterScope, Scope } from '@client/utils/authUtils'
+import { formattedDuration } from '@client/utils/date-formatting'
+import { RegStatus, SearchEventsQuery } from '@client/utils/gateway'
 import {
   IconWithName,
   IconWithNameEvent,
-  NoNameContainer,
-  NameContainer
+  NameContainer,
+  NoNameContainer
 } from '@client/views/OfficeHome/components'
 import {
   changeSortedColumn,
@@ -61,8 +45,20 @@ import {
   getSortedItems
 } from '@client/views/OfficeHome/utils'
 import { WQContentWrapper } from '@client/views/OfficeHome/WQContentWrapper'
-import { RegStatus } from '@client/utils/gateway'
 import { useWindowSize } from '@opencrvs/components/lib/hooks'
+import { ITheme } from '@opencrvs/components/lib/theme'
+import {
+  ColumnContentAlignment,
+  COLUMNS,
+  IAction,
+  SORT_ORDER,
+  Workqueue
+} from '@opencrvs/components/lib/Workqueue'
+import React, { useState } from 'react'
+import { injectIntl, WrappedComponentProps as IntlShapeProps } from 'react-intl'
+import { connect } from 'react-redux'
+import ReactTooltip from 'react-tooltip'
+import styled, { withTheme } from 'styled-components'
 
 const ToolTipContainer = styled.span`
   text-align: center;
@@ -74,7 +70,7 @@ interface IBaseReviewTabProps {
   goToDeclarationRecordAudit: typeof goToDeclarationRecordAudit
   outboxDeclarations: IDeclaration[]
   queryData: {
-    data: GQLEventSearchResultSet
+    data: SearchEventsQuery['searchEvents']
   }
   paginationId: number
   pageSize: number
@@ -117,7 +113,9 @@ const ReadyForReviewComponent = ({
     setSortOrder(newSortOrder)
   }
 
-  const transformDeclaredContent = (data: GQLEventSearchResultSet) => {
+  const transformDeclaredContent = (
+    data: SearchEventsQuery['searchEvents']
+  ) => {
     if (!data || !data.results) {
       return []
     }
@@ -173,22 +171,13 @@ const ReadyForReviewComponent = ({
         )
       })
 
-      const event =
-        (reg.event &&
-          intl.formatMessage(
-            dynamicConstantsMessages[reg.event.toLowerCase()]
-          )) ||
-        ''
+      const event = `@todo: ${reg.event}`
       const isValidatedOnReview =
         reg.declarationStatus === SUBMISSION_STATUS.VALIDATED &&
         userHasRegisterScope()
           ? true
           : false
-      const dateOfEvent =
-        (reg.dateOfEvent &&
-          reg.dateOfEvent.length > 0 &&
-          plainDateToLocalDate(reg.dateOfEvent)) ||
-        ''
+      const dateOfEvent = '@todo' // plainDateToLocalDate(reg.dateOfEvent))
       const createdAt =
         getPreviousOperationDateByOperationType(
           reg.operationHistories,
@@ -248,8 +237,7 @@ const ReadyForReviewComponent = ({
     return sortedItems.map((item) => {
       return {
         ...item,
-        dateOfEvent:
-          item.dateOfEvent && formattedDuration(item.dateOfEvent as Date),
+        dateOfEvent: '@todo',
         sentForReview:
           item.sentForReview && formattedDuration(item.sentForReview as any)
       }

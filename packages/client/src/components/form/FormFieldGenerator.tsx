@@ -134,7 +134,7 @@ import { IAdvancedSearchFormState } from '@client/search/advancedSearch/utils'
 import { UserDetails } from '@client/utils/userUtils'
 import { VerificationButton } from '@opencrvs/components/lib/VerificationButton'
 import { useOnlineStatus } from '@client/utils'
-import { useNidAuthentication } from '@client/views/OIDPVerificationCallback/utils'
+
 import { BulletList, Divider, InputLabel, Stack } from '@opencrvs/components'
 import { Heading2, Heading3 } from '@opencrvs/components/lib/Headings/Headings'
 import { SignatureUploader } from './SignatureField/SignatureUploader'
@@ -791,7 +791,6 @@ interface IFormSectionProps {
 interface IStateProps {
   offlineCountryConfig: IOfflineData
   userDetails: UserDetails | null
-  onNidAuthenticationClick: () => void
 }
 
 interface IDispatchProps {
@@ -1120,11 +1119,6 @@ class FormSectionComponent extends React.Component<Props> {
                     field.searchableType as LocationType[]
                   )
                 }
-              : field.type === NID_VERIFICATION_BUTTON
-              ? ({
-                  ...field,
-                  onClick: this.props.onNidAuthenticationClick
-                } as INidVerificationButton)
               : field
 
           if (
@@ -1311,7 +1305,6 @@ export const FormFieldGenerator: React.FC<IFormSectionProps> = (props) => {
   const userDetails = useSelector(getUserDetails)
   const intl = useIntl()
   const dispatch = useDispatch()
-  const { onClick: onNidAuthenticationClick } = useNidAuthentication()
 
   return (
     <Formik<IFormSectionData>
@@ -1345,7 +1338,6 @@ export const FormFieldGenerator: React.FC<IFormSectionProps> = (props) => {
           offlineCountryConfig={offlineCountryConfig}
           userDetails={userDetails}
           dynamicDispatch={(...args) => dispatch(dynamicDispatch(...args))}
-          onNidAuthenticationClick={onNidAuthenticationClick}
         />
       )}
     </Formik>

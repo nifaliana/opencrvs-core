@@ -60,10 +60,9 @@ import { Leaderboards } from '@client/views/Performance/Leaderboards'
 import { PerformanceDashboard } from '@client/views/Performance/Dashboard'
 import { SystemRoleType } from '@client/utils/gateway'
 import { AdministrativeLevels } from '@client/views/Organisation/AdministrativeLevels'
-import { VerifyCertificatePage } from '@client/views/VerifyCertificate/VerifyCertificatePage'
 import { IssueCertificate } from '@client/views/IssueCertificate/IssueCertificate'
 import { IssuePayment } from '@client/views/IssueCertificate/IssueCollectorForm/IssuePayment'
-import { OIDPVerificationCallback } from './views/OIDPVerificationCallback/OIDPVerificationCallback'
+
 import { ApolloProvider } from '@client/utils/ApolloProvider'
 import { Home } from '@client/views/OfficeHome/Home'
 import { PrintRecord } from './views/PrintRecord/PrintRecord'
@@ -160,13 +159,7 @@ export function App(props: IAppProps) {
                                               }
                                               component={DeclarationForm}
                                             />
-                                            <ProtectedRoute
-                                              exact
-                                              path={
-                                                routes.VIEW_VERIFY_CERTIFICATE
-                                              }
-                                              component={VerifyCertificatePage}
-                                            />
+
                                             <ProtectedRoute
                                               exact
                                               path={
@@ -532,15 +525,6 @@ export function App(props: IAppProps) {
                                                 routes.ISSUE_CERTIFICATE_PAYMENT
                                               }
                                               component={IssuePayment}
-                                            />
-                                            <ProtectedRoute
-                                              exact
-                                              path={
-                                                routes.OIDP_VERIFICATION_CALLBACK
-                                              }
-                                              component={
-                                                OIDPVerificationCallback
-                                              }
                                             />
                                             <ProtectedRoute
                                               exact

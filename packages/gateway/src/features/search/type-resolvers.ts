@@ -21,7 +21,7 @@ interface IAssignment {
 }
 
 export const searchTypeResolvers: GQLResolver = {
-  EventSearchSet: {
+  IndexedEvent: {
     status(searchData) {
       return searchData.type
     },

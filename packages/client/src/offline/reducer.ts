@@ -293,7 +293,7 @@ function reducer(
         Cmd.run(storage.getItem, {
           args: ['offline'],
           successActionCreator: actions.getOfflineDataSuccess,
-          // this action isn't handled
+          // @todo this action isn't handled
           failActionCreator: actions.getOfflineDataFailed
         })
       )

@@ -37,8 +37,6 @@ import {
   MARK_EVENT_AS_DUPLICATE,
   getBirthMutation
 } from '@client/views/DataProvider/birth/mutations'
-import { getDeathMutation } from '@client/views/DataProvider/death/mutations'
-import { getMarriageMutation } from '@client/views/DataProvider/marriage/mutations'
 import { NOT_A_DUPLICATE } from '@client/views/DataProvider/mutation'
 import { updateRegistrarWorkqueue } from '@client/workqueue'
 import { Action, Middleware, createAction } from '@reduxjs/toolkit'
@@ -221,12 +219,10 @@ export const submissionMiddleware: Middleware<{}, IStoreState> =
       )[0].payments = payments
     }
 
-    const mutation =
-      event === Event.Birth
-        ? getBirthMutation(submissionAction)
-        : event === Event.Death
-        ? getDeathMutation(submissionAction)
-        : getMarriageMutation(submissionAction)
+    if (event !== Event.Birth) {
+      throw new Error('Unknown event type ' + event)
+    }
+    const mutation = getBirthMutation(submissionAction)
 
     if (!mutation) {
       throw new Error(

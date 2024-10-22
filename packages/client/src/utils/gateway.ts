@@ -43,7 +43,7 @@ export type Action = {
   createdAtLocation: Scalars['String']
   createdBy: Scalars['String']
   fields: Array<Field>
-  type: Scalars['String']
+  type: RegAction
 }
 
 export type ActionsInput = {
@@ -406,8 +406,14 @@ export type Estimation = {
   totalEstimation: Scalars['Float']
 }
 
-export type Event = {
-  __typename?: 'Event'
+export enum Event {
+  Birth = 'birth',
+  Death = 'death',
+  Marriage = 'marriage'
+}
+
+export type EventData = {
+  __typename?: 'EventData'
   actions: Array<Action>
   createdAt: Scalars['String']
   id: Scalars['ID']
@@ -460,19 +466,8 @@ export type EventMetricsByTime = {
 
 export type EventSearchResultSet = {
   __typename?: 'EventSearchResultSet'
-  results: Array<EventSearchSet>
+  results: Array<IndexedEvent>
   totalItems: Scalars['Int']
-}
-
-export type EventSearchSet = {
-  __typename?: 'EventSearchSet'
-  assignedTo?: Maybe<AssignmentData>
-  createdAt: Scalars['Date']
-  createdAtLocation: Scalars['String']
-  id: Scalars['ID']
-  modifiedAt: Scalars['String']
-  status: Scalars['String']
-  type: Scalars['String']
 }
 
 export type Field = {
@@ -507,6 +502,17 @@ export type Identifier = {
   __typename?: 'Identifier'
   system?: Maybe<Scalars['String']>
   value?: Maybe<Scalars['String']>
+}
+
+export type IndexedEvent = {
+  __typename?: 'IndexedEvent'
+  assignedTo?: Maybe<AssignmentData>
+  createdAt: Scalars['Date']
+  createdAtLocation: Scalars['String']
+  id: Scalars['ID']
+  modifiedAt: Scalars['String']
+  status: Scalars['String']
+  type: Scalars['String']
 }
 
 export enum IntegratingSystemType {
@@ -619,9 +625,9 @@ export type Mutation = {
   markEventAsNotDuplicate: Scalars['ID']
   markEventAsRegistered: Scalars['ID']
   markEventAsReinstated?: Maybe<Reinstated>
-  markEventAsUnassigned?: Maybe<Event>
+  markEventAsUnassigned?: Maybe<EventData>
   markEventAsValidated?: Maybe<Scalars['ID']>
-  markEventAsVerified?: Maybe<Event>
+  markEventAsVerified?: Maybe<EventData>
   markEventAsVoided: Scalars['ID']
   reactivateSystem?: Maybe<System>
   refreshSystemSecret?: Maybe<SystemSecret>
@@ -835,10 +841,10 @@ export enum PaymentType {
 
 export type Query = {
   __typename?: 'Query'
-  fetchEvent?: Maybe<Event>
+  fetchEvent?: Maybe<EventData>
   fetchLocationWiseEventMetrics?: Maybe<Array<LocationWiseEstimationMetric>>
   fetchMonthWiseEventMetrics?: Maybe<Array<MonthWiseEstimationMetric>>
-  fetchRecordDetailsForVerification?: Maybe<Event>
+  fetchRecordDetailsForVerification?: Maybe<EventData>
   fetchRegistrationCountByStatus?: Maybe<RegistrationCountResult>
   fetchSystem?: Maybe<System>
   getDeclarationsStartedMetrics?: Maybe<DeclarationsStartedMetrics>
@@ -885,7 +891,7 @@ export type QueryFetchRecordDetailsForVerificationArgs = {
 }
 
 export type QueryFetchRegistrationCountByStatusArgs = {
-  event?: InputMaybe<Scalars['String']>
+  event?: InputMaybe<Event>
   locationId?: InputMaybe<Scalars['String']>
   status: Array<InputMaybe<Scalars['String']>>
 }
@@ -1021,6 +1027,22 @@ export type QuerySendNotificationToAllUsersArgs = {
 export type QueryVerifyPasswordByIdArgs = {
   id: Scalars['String']
   password: Scalars['String']
+}
+
+export enum RegAction {
+  ApprovedCorrection = 'APPROVED_CORRECTION',
+  Assigned = 'ASSIGNED',
+  Corrected = 'CORRECTED',
+  Downloaded = 'DOWNLOADED',
+  FlaggedAsPotentialDuplicate = 'FLAGGED_AS_POTENTIAL_DUPLICATE',
+  MarkedAsDuplicate = 'MARKED_AS_DUPLICATE',
+  MarkedAsNotDuplicate = 'MARKED_AS_NOT_DUPLICATE',
+  Reinstated = 'REINSTATED',
+  RejectedCorrection = 'REJECTED_CORRECTION',
+  RequestedCorrection = 'REQUESTED_CORRECTION',
+  Unassigned = 'UNASSIGNED',
+  Verified = 'VERIFIED',
+  Viewed = 'VIEWED'
 }
 
 export enum RegStatus {
@@ -1783,7 +1805,7 @@ export type SearchEventsQuery = {
     __typename?: 'EventSearchResultSet'
     totalItems: number
     results: Array<{
-      __typename?: 'EventSearchSet'
+      __typename?: 'IndexedEvent'
       id: string
       type: string
       createdAt: any
@@ -2050,7 +2072,7 @@ export type SubmitMutationMutationVariables = Exact<{
 
 export type SubmitMutationMutation = {
   __typename?: 'Mutation'
-  markEventAsUnassigned?: { __typename?: 'Event'; id: string } | null
+  markEventAsUnassigned?: { __typename?: 'EventData'; id: string } | null
 }
 
 export type MarkEventAsDuplicateMutationVariables = Exact<{
@@ -2072,7 +2094,7 @@ export type FetchBirthRegistrationForReviewQueryVariables = Exact<{
 export type FetchBirthRegistrationForReviewQuery = {
   __typename?: 'Query'
   fetchEvent?: {
-    __typename?: 'Event'
+    __typename?: 'EventData'
     id: string
     actions: Array<{
       __typename?: 'Action'
@@ -2088,7 +2110,7 @@ export type FetchBirthRegistrationForCertificateQueryVariables = Exact<{
 export type FetchBirthRegistrationForCertificateQuery = {
   __typename?: 'Query'
   fetchEvent?: {
-    __typename?: 'Event'
+    __typename?: 'EventData'
     id: string
     actions: Array<{
       __typename?: 'Action'
@@ -2104,7 +2126,7 @@ export type FetchDeathRegistrationForReviewQueryVariables = Exact<{
 export type FetchDeathRegistrationForReviewQuery = {
   __typename?: 'Query'
   fetchEvent?: {
-    __typename?: 'Event'
+    __typename?: 'EventData'
     id: string
     actions: Array<{
       __typename?: 'Action'
@@ -2120,7 +2142,7 @@ export type FetchDeathRegistrationForCertificationQueryVariables = Exact<{
 export type FetchDeathRegistrationForCertificationQuery = {
   __typename?: 'Query'
   fetchEvent?: {
-    __typename?: 'Event'
+    __typename?: 'EventData'
     id: string
     actions: Array<{
       __typename?: 'Action'
@@ -2136,7 +2158,7 @@ export type FetchMarriageRegistrationForReviewQueryVariables = Exact<{
 export type FetchMarriageRegistrationForReviewQuery = {
   __typename?: 'Query'
   fetchEvent?: {
-    __typename?: 'Event'
+    __typename?: 'EventData'
     id: string
     actions: Array<{
       __typename?: 'Action'
@@ -2152,7 +2174,7 @@ export type FetchMarriageRegistrationForCertificateQueryVariables = Exact<{
 export type FetchMarriageRegistrationForCertificateQuery = {
   __typename?: 'Query'
   fetchEvent?: {
-    __typename?: 'Event'
+    __typename?: 'EventData'
     id: string
     actions: Array<{
       __typename?: 'Action'
@@ -2171,7 +2193,7 @@ export type MarkEventAsNotDuplicateMutation = {
 }
 
 export type EventSearchFieldsFragment = {
-  __typename?: 'EventSearchSet'
+  __typename?: 'IndexedEvent'
   id: string
   type: string
   status: string
@@ -2209,7 +2231,7 @@ export type RegistrationHomeQuery = {
     __typename?: 'EventSearchResultSet'
     totalItems: number
     results: Array<{
-      __typename?: 'EventSearchSet'
+      __typename?: 'IndexedEvent'
       id: string
       type: string
       status: string
@@ -2229,7 +2251,7 @@ export type RegistrationHomeQuery = {
     __typename?: 'EventSearchResultSet'
     totalItems: number
     results: Array<{
-      __typename?: 'EventSearchSet'
+      __typename?: 'IndexedEvent'
       id: string
       type: string
       status: string
@@ -2249,7 +2271,7 @@ export type RegistrationHomeQuery = {
     __typename?: 'EventSearchResultSet'
     totalItems: number
     results: Array<{
-      __typename?: 'EventSearchSet'
+      __typename?: 'IndexedEvent'
       id: string
       type: string
       status: string
@@ -2269,7 +2291,7 @@ export type RegistrationHomeQuery = {
     __typename?: 'EventSearchResultSet'
     totalItems: number
     results: Array<{
-      __typename?: 'EventSearchSet'
+      __typename?: 'IndexedEvent'
       id: string
       type: string
       status: string
@@ -2289,7 +2311,7 @@ export type RegistrationHomeQuery = {
     __typename?: 'EventSearchResultSet'
     totalItems: number
     results: Array<{
-      __typename?: 'EventSearchSet'
+      __typename?: 'IndexedEvent'
       id: string
       type: string
       status: string
@@ -2309,7 +2331,7 @@ export type RegistrationHomeQuery = {
     __typename?: 'EventSearchResultSet'
     totalItems: number
     results: Array<{
-      __typename?: 'EventSearchSet'
+      __typename?: 'IndexedEvent'
       id: string
       type: string
       status: string
@@ -2329,7 +2351,7 @@ export type RegistrationHomeQuery = {
     __typename?: 'EventSearchResultSet'
     totalItems: number
     results: Array<{
-      __typename?: 'EventSearchSet'
+      __typename?: 'IndexedEvent'
       id: string
       type: string
       status: string
@@ -2349,7 +2371,7 @@ export type RegistrationHomeQuery = {
     __typename?: 'EventSearchResultSet'
     totalItems: number
     results: Array<{
-      __typename?: 'EventSearchSet'
+      __typename?: 'IndexedEvent'
       id: string
       type: string
       status: string
@@ -2381,7 +2403,7 @@ export type FieldAgentHomeQuery = {
     __typename?: 'EventSearchResultSet'
     totalItems: number
     results: Array<{
-      __typename?: 'EventSearchSet'
+      __typename?: 'IndexedEvent'
       id: string
       type: string
       status: string
@@ -2401,7 +2423,7 @@ export type FieldAgentHomeQuery = {
     __typename?: 'EventSearchResultSet'
     totalItems: number
     results: Array<{
-      __typename?: 'EventSearchSet'
+      __typename?: 'IndexedEvent'
       id: string
       type: string
       status: string
@@ -2439,7 +2461,7 @@ export type FetchDeclarationShortInfoQueryVariables = Exact<{
 export type FetchDeclarationShortInfoQuery = {
   __typename?: 'Query'
   fetchEvent?: {
-    __typename?: 'Event'
+    __typename?: 'EventData'
     id: string
     actions: Array<{
       __typename?: 'Action'
@@ -2736,7 +2758,7 @@ export type GetLocationStatisticsQueryVariables = Exact<{
   locationId?: InputMaybe<Scalars['String']>
   populationYear: Scalars['Int']
   status: Array<InputMaybe<Scalars['String']>> | InputMaybe<Scalars['String']>
-  event?: InputMaybe<Scalars['String']>
+  event?: InputMaybe<Event>
   officeSelected: Scalars['Boolean']
 }>
 
@@ -3002,22 +3024,6 @@ export type SubmitActivateUserMutation = {
   activateUser?: string | null
 }
 
-export type FetchRecordDetailsForVerificationQueryVariables = Exact<{
-  id: Scalars['ID']
-}>
-
-export type FetchRecordDetailsForVerificationQuery = {
-  __typename?: 'Query'
-  fetchEvent?: {
-    __typename?: 'Event'
-    id: string
-    actions: Array<{
-      __typename?: 'Action'
-      fields: Array<{ __typename?: 'Field'; fieldId: string; value: string }>
-    }>
-  } | null
-}
-
 export type FetchViewRecordByCompositionQueryVariables = Exact<{
   id: Scalars['ID']
 }>
@@ -3025,7 +3031,7 @@ export type FetchViewRecordByCompositionQueryVariables = Exact<{
 export type FetchViewRecordByCompositionQuery = {
   __typename?: 'Query'
   fetchEvent?: {
-    __typename?: 'Event'
+    __typename?: 'EventData'
     id: string
     actions: Array<{
       __typename?: 'Action'

@@ -5,13 +5,13 @@ type Query {
     locale: String!
     type: NotificationType = EMAIL
   ): NotificationResult
-  fetchEvent(id: ID!): Event
+  fetchEvent(id: ID!): EventData
   fetchRegistrationCountByStatus(
     status: [String]!
     locationId: String
-    event: String
+    event: Event
   ): RegistrationCountResult
-  fetchRecordDetailsForVerification(id: String!): Event
+  fetchRecordDetailsForVerification(id: String!): EventData
   hasChildLocation(parentId: String!): Location
   getUser(userId: String): User
   getUserByMobile(mobile: String): User
@@ -128,8 +128,8 @@ type Mutation {
   approveEventCorrection(id: ID!, details: EventInput!): ID!
   createEventCorrection(id: ID!, details: EventInput!): ID!
   createEvent(details: EventInput!): CreatedIds!
-  markEventAsUnassigned(id: ID!): Event
-  markEventAsVerified(id: ID!, details: EventInput!): Event
+  markEventAsUnassigned(id: ID!): EventData
+  markEventAsVerified(id: ID!, details: EventInput!): EventData
   markEventAsValidated(id: ID!, details: EventInput!): ID
   markEventAsRegistered(id: ID!, details: EventInput!): ID!
   markEventAsCertified(id: ID!, details: EventInput!): ID!
@@ -210,7 +210,7 @@ enum NotificationType {
   SMS
 }
 
-type Event {
+type EventData {
   id: ID!
   type: String!
   createdAt: String!
@@ -220,6 +220,12 @@ type Event {
 type RegistrationCountResult {
   results: [StatusWiseRegistrationCount]!
   total: Int!
+}
+
+enum Event {
+  birth
+  death
+  marriage
 }
 
 type Location {
@@ -348,7 +354,7 @@ type UserAuditLogResultSet {
 }
 
 type EventSearchResultSet {
-  results: [EventSearchSet!]!
+  results: [IndexedEvent!]!
   totalItems: Int!
 }
 
@@ -571,7 +577,7 @@ input RemoveBookmarkedSeachInput {
 }
 
 type Action {
-  type: String!
+  type: RegAction!
   createdBy: String!
   createdAt: String!
   createdAtLocation: String!
@@ -717,7 +723,7 @@ union UserAuditLogResultItem =
     UserAuditLogItemWithComposition
   | UserAuditLogItem
 
-type EventSearchSet {
+type IndexedEvent {
   status: String!
   id: ID!
   type: String!
@@ -852,6 +858,22 @@ input SystemSettingsInput {
 input WebhookInput {
   event: String!
   permissions: [String]!
+}
+
+enum RegAction {
+  VERIFIED
+  ASSIGNED
+  UNASSIGNED
+  REINSTATED
+  REQUESTED_CORRECTION
+  APPROVED_CORRECTION
+  REJECTED_CORRECTION
+  CORRECTED
+  DOWNLOADED
+  VIEWED
+  MARKED_AS_DUPLICATE
+  MARKED_AS_NOT_DUPLICATE
+  FLAGGED_AS_POTENTIAL_DUPLICATE
 }
 
 type Field {

@@ -11,7 +11,7 @@
 import { gql } from '@apollo/client'
 
 const EVENT_SEARCH_RESULT_FIELDS = gql`
-  fragment EventSearchFields on EventSearchSet {
+  fragment EventSearchFields on IndexedEvent {
     id
     type
     status

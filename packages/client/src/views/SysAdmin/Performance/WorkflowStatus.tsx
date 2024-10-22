@@ -51,7 +51,7 @@ import { RouteComponentProps } from 'react-router'
 import ReactTooltip from 'react-tooltip'
 import styled from 'styled-components'
 import { checkExternalValidationStatus } from '@client/views/SysAdmin/Team/utils'
-import { FETCH_EVENTS_WITH_PROGRESS } from './queries'
+
 import { IStatusMapping } from './reports/operational/StatusWiseDeclarationCountView'
 import format, { formattedDuration } from '@client/utils/date-formatting'
 import subYears from 'date-fns/subYears'
@@ -776,65 +776,7 @@ function WorkflowStatusComponent(props: WorkflowStatusProps) {
           </>
         }
       >
-        <Query
-          query={FETCH_EVENTS_WITH_PROGRESS}
-          variables={{
-            declarationJurisdictionId: locationId,
-            skip: pageSize * (currentPageNumber - 1),
-            count: pageSize,
-            registrationStatuses: (status && [status]) || undefined,
-            compositionType:
-              (event && [
-                `${event.toLowerCase()}-declaration`,
-                `${event.toLowerCase()}-notification`
-              ]) ||
-              undefined
-          }}
-          fetchPolicy={'no-cache'}
-        >
-          {({ data, loading, error }) => {
-            let total = 0
-            if (loading) {
-              return <Spinner id="status-view-loader" size={24} />
-            }
-            if (
-              data &&
-              data.getEventsWithProgress &&
-              data.getEventsWithProgress.totalItems
-            ) {
-              total = data.getEventsWithProgress.totalItems
-            }
-
-            return (
-              <>
-                <TableDiv id="table-div-wrapper">
-                  <Table
-                    id="declaration-status-list"
-                    content={getContent(data)}
-                    columns={getColumns()}
-                    isLoading={loading || Boolean(error)}
-                    noResultText={intl.formatMessage(
-                      constantsMessages.noResults
-                    )}
-                    fixedWidth={2050}
-                    tableHeight={150}
-                    highlightRowOnMouseOver
-                    noPagination
-                    isFullPage
-                  />
-                  {error && <GenericErrorToast />}
-                  {total > pageSize && (
-                    <Pagination
-                      currentPage={currentPageNumber}
-                      totalPages={Math.ceil(total / pageSize)}
-                      onPageChange={onPageChange}
-                    />
-                  )}
-                </TableDiv>
-              </>
-            )
-          }}
-        </Query>
+        <span>@todo</span>
       </Content>
     </SysAdminContentWrapper>
   )

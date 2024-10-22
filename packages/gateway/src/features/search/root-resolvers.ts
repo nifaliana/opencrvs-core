@@ -11,6 +11,8 @@
 import { GQLResolver } from '@gateway/graphql/schema'
 
 import { ApolloError } from 'apollo-server-hapi'
+import { decode } from 'jsonwebtoken'
+import { getUser } from '../user/utils'
 
 export class RateLimitError extends ApolloError {
   constructor(message: string) {
@@ -74,6 +76,12 @@ export const resolvers: GQLResolver = {
       },
       { headers: authHeader }
     ) {
+      const decoded = decode(
+        authHeader.Authorization.replace('Bearer ', '')
+      ) as { sub: string }
+      const user = await getUser({ userId: decoded.sub }, authHeader)
+      console.log(user)
+
       return {
         totalItems: 1,
         results: [
@@ -81,12 +89,12 @@ export const resolvers: GQLResolver = {
           {
             status: 'REGISTERED',
             id: '10a219cd-50a6-41b5-90b2-676949d3f192',
-            type: 'birth',
+            type: 'divorce',
             createdAt: '2021-08-10T10:00:00Z',
-            createdAtLocation: 'cd3d7dec-6e86-48bc-a7a5-0dc66d442594',
+            createdAtLocation: user.primaryOfficeId,
             modifiedAt: '2021-08-10T10:00:00Z',
             assignedTo: {
-              practitionerId: 'e4e731fc-c320-4f51-b6a3-91750ad17aa3',
+              practitionerId: user.practitionerId,
               firstName: 'Riku',
               lastName: 'Rouvila',
               officeName: 'Helsinki office',
