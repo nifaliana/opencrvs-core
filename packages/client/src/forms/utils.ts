@@ -58,11 +58,7 @@ import {
   REDIRECT
 } from '@client/forms'
 import { IntlShape, MessageDescriptor } from 'react-intl'
-import {
-  getValidationErrorsForForm,
-  IFieldErrors,
-  Errors
-} from '@client/forms/validation'
+
 import {
   OFFLINE_LOCATIONS_KEY,
   OFFLINE_FACILITIES_KEY,
@@ -77,12 +73,14 @@ import {
 import { IRadioOption as CRadioOption } from '@opencrvs/components/lib/Radio'
 import { IDynamicValues } from '@client/navigation'
 import { callingCountries } from 'country-data'
-import { IDeclaration } from '@client/declarations'
 import differenceInDays from 'date-fns/differenceInDays'
 import { PhoneNumberUtil, PhoneNumberFormat } from 'google-libphonenumber'
-import { Conditional } from './conditionals'
+
 import { UserDetails } from '@client/utils/userUtils'
 import * as SupportedIcons from '@opencrvs/components/lib/Icon/all-icons'
+import { get, isNull, isUndefined } from 'lodash'
+import { Conditional } from './conditionals'
+import { Errors, getValidationErrorsForForm, IFieldErrors } from './validation'
 
 export const VIEW_TYPE = {
   FORM: 'form',
@@ -315,53 +313,6 @@ export const getFieldValidation = (
   return validator
 }
 
-export function getNextSectionIds(
-  sections: IFormSection[],
-  fromSection: IFormSection,
-  fromSectionGroup: IFormSectionGroup,
-  declaration: IDeclaration,
-  userDetails?: UserDetails | null
-): { [key: string]: string } | null {
-  const visibleGroups = getVisibleSectionGroupsBasedOnConditions(
-    fromSection,
-    declaration.data[fromSection.id] || {},
-    declaration.data,
-    userDetails
-  )
-  const currentGroupIndex = visibleGroups.findIndex(
-    (group: IFormSectionGroup) => group.id === fromSectionGroup.id
-  )
-
-  if (currentGroupIndex === visibleGroups.length - 1) {
-    const visibleSections = sections.filter(
-      (section) =>
-        section.viewType !== VIEW_TYPE.HIDDEN &&
-        getVisibleSectionGroupsBasedOnConditions(
-          section,
-          declaration.data[fromSection.id] || {},
-          declaration.data,
-          userDetails
-        ).length > 0
-    )
-
-    const currentIndex = visibleSections.findIndex(
-      (section: IFormSection) => section.id === fromSection.id
-    )
-    if (currentIndex === visibleSections.length - 1) {
-      return null
-    }
-
-    return {
-      sectionId: visibleSections[currentIndex + 1].id,
-      groupId: visibleSections[currentIndex + 1].groups[0].id
-    }
-  }
-  return {
-    sectionId: fromSection.id,
-    groupId: visibleGroups[currentGroupIndex + 1].id
-  }
-}
-
 export const getVisibleGroupFields = (group: IFormSectionGroup) => {
   return group.fields.filter((field) => !field.hidden)
 }
@@ -568,6 +519,37 @@ export function getQueryData(
   const variables = getInputValues(queryData.inputs, values)
   queryData.variables = variables
   return queryData
+}
+
+export function getInitialValue(
+  field: IFormField,
+  form: IFormSectionData,
+  draft: IFormData,
+  config: IOfflineData,
+  user: UserDetails | null
+) {
+  let fieldInitialValue = field.initialValue
+  if (field.initialValueKey) {
+    fieldInitialValue = get(draft, field.initialValueKey, '')
+  }
+
+  return handleInitialValue(fieldInitialValue!, form, config, draft, user)
+}
+
+export function replaceInitialValues(
+  fields: IFormField[],
+  form: IFormSectionData,
+  draft: IFormData,
+  config: IOfflineData,
+  user: UserDetails | null
+) {
+  return fields.map((field) => ({
+    ...field,
+    initialValue:
+      isUndefined(form[field.name]) || isNull(form[field.name])
+        ? getInitialValue(field, form, draft, config, user)
+        : form[field.name]
+  }))
 }
 
 export const getConditionalActionsForField = (

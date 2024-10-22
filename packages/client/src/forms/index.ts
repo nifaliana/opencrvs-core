@@ -20,18 +20,12 @@ import { ISelectOption as SelectComponentOption } from '@opencrvs/components/lib
 import type { GQLQuery } from '@client/utils/gateway-deprecated-do-not-use.d'
 import { MessageDescriptor } from 'react-intl'
 
-import { ICertificate as IDeclarationCertificate } from '@client/declarations'
 import { IOfflineData } from '@client/offline/reducer'
 import * as validators from '@opencrvs/client/src/utils/validate'
 import { IFont } from '@opencrvs/components/lib/fonts'
 import { ISearchLocation } from '@opencrvs/components/lib/LocationSearch'
-import * as mutations from './register/mappings/mutation'
-import * as graphQLQueries from './register/legacy'
-import * as queries from './register/mappings/query'
-import * as responseTransformers from './register/legacy/response-transformers'
 import { UserDetails } from '@client/utils/userUtils'
 import { Conditional } from './conditionals'
-import * as labels from '@client/forms/certificate/fieldDefinitions/label'
 import {
   BIRTH_REGISTRATION_NUMBER,
   DEATH_REGISTRATION_NUMBER,
@@ -180,36 +174,6 @@ export const identityTypeMapper: IDynamicFieldTypeMapper = (key: string) => {
   }
 }
 
-export interface ISerializedDynamicFormFieldDefinitions {
-  label?: {
-    dependency: string
-    labelMapper: Operation<typeof labels>
-  }
-  helperText?: {
-    dependency: string
-    helperTextMapper: Operation<typeof labels>
-  }
-  tooltip?: {
-    dependency: string
-    tooltipMapper: Operation<typeof labels>
-  }
-  unit?: {
-    dependency: string
-    unitMapper: Operation<typeof labels>
-  }
-  type?:
-    | IStaticFieldType
-    | {
-        kind: 'dynamic'
-        dependency: string
-        typeMapper: Operation<typeof identityTypeMapper>
-      }
-  validator?: Array<{
-    dependencies: string[]
-    validator: FactoryOperation<typeof validators, IQueryDescriptor>
-  }>
-}
-
 export interface IDynamicFormFieldDefinitions {
   label?: IDynamicFieldLabel
   helperText?: IDynamicFieldHelperText
@@ -262,7 +226,6 @@ export type IFormFieldValue =
   | number
   | boolean
   | Date
-  | IDeclarationCertificate
   | IFileValue
   | IAttachmentValue
   | FieldValueArray
@@ -342,116 +305,7 @@ export type IFormFieldQueryMapFunction = (
 export type IFormFieldTemplateMapOperation =
   | [string, IFormFieldQueryMapFunction]
   | [string]
-/*
- * Takes in an array of function arguments (array, number, string, function)
- * and replaces all functions with the descriptor type
- *
- * So type Array<number | Function | string> would become
- * Array<number | Descriptor | string>
- */
-type FunctionParamsToDescriptor<T, Descriptor> =
-  // It's an array - recursively call this type for all items
-  T extends Array<any>
-    ? { [K in keyof T]: FunctionParamsToDescriptor<T[K], Descriptor> }
-    : T extends IFormFieldQueryMapFunction | IFormFieldMutationMapFunction // It's a query transformation function - return a query transformation descriptor
-    ? Descriptor
-    : T // It's a none of the above - return self
 
-interface FactoryOperation<
-  OperationMap,
-  Descriptor extends IQueryDescriptor | IMutationDescriptor,
-  Key extends keyof OperationMap = keyof OperationMap
-> {
-  operation: Key
-  parameters: FunctionParamsToDescriptor<Params<OperationMap[Key]>, Descriptor>
-}
-interface Operation<
-  OperationMap,
-  Key extends keyof OperationMap = keyof OperationMap
-> {
-  operation: Key
-}
-
-export type IFormFieldQueryMapDescriptor<
-  T extends keyof typeof queries = keyof typeof queries
-> = {
-  operation: T
-  parameters: FunctionParamsToDescriptor<
-    Params<(typeof queries)[T]>,
-    IQueryDescriptor
-  >
-}
-
-export type IFormFieldMapping = {
-  mutation?: IFormFieldMutationMapFunction
-  query?: IFormFieldQueryMapFunction
-  template?: IFormFieldTemplateMapOperation
-}
-
-/*
- * These types are here only for replacing mapping types to
- * serializable ones in IFormField. The default Omit type doesn't work
- * with type unions :(
- */
-
-type UnionKeys<T> = T extends any ? keyof T : never
-type UnionPick<T, K extends any> = T extends any
-  ? Pick<T, Extract<K, keyof T>>
-  : never
-
-type UnionOmit<T, K extends UnionKeys<T>> = UnionPick<
-  T,
-  Exclude<UnionKeys<T>, K>
->
-
-type SerializedFormFieldWithDynamicDefinitions = UnionOmit<
-  IFormFieldWithDynamicDefinitions,
-  'dynamicDefinitions'
-> & {
-  dynamicDefinitions: ISerializedDynamicFormFieldDefinitions
-}
-type SerializedSelectFormFieldWithOptions = Omit<
-  ISelectFormFieldWithOptions,
-  'options'
-> & {
-  options: ISelectOption[] | { resource: string }
-  optionCondition?: string
-}
-
-type ILoaderButtonWithSerializedQueryMap = Omit<ILoaderButton, 'queryMap'> & {
-  queryMap: ISerializedQueryMap
-}
-
-type SerializedRadioGroupWithNestedFields = Omit<
-  IRadioGroupWithNestedFieldsFormField,
-  'nestedFields'
-> & {
-  nestedFields: { [key: string]: SerializedFormField[] }
-}
-
-export type IMapping = {
-  mutation?: IMutationDescriptor
-  query?: IQueryDescriptor
-  template?: ITemplateDescriptor
-}
-
-export type SerializedFormField = UnionOmit<
-  | Exclude<
-      IFormField,
-      | IFormFieldWithDynamicDefinitions
-      | ILoaderButton
-      | ISelectFormFieldWithOptions
-      | IRadioGroupWithNestedFieldsFormField
-    >
-  | SerializedSelectFormFieldWithOptions
-  | SerializedFormFieldWithDynamicDefinitions
-  | ILoaderButtonWithSerializedQueryMap
-  | SerializedRadioGroupWithNestedFields,
-  'validator' | 'mapping'
-> & {
-  validator: IValidatorDescriptor[]
-  mapping?: IMapping
-}
 export interface IAttachment {
   data: string
   uri?: string
@@ -496,7 +350,6 @@ export interface IFormFieldBase {
   conditionals?: Conditional[]
   description?: MessageDescriptor
   placeholder?: MessageDescriptor
-  mapping?: IFormFieldMapping
   hideAsterisk?: boolean
   hideHeader?: boolean
   hidden?: boolean
@@ -692,12 +545,6 @@ export interface IQuery {
   responseTransformer: (response: ApolloQueryResult<GQLQuery>) => void
 }
 
-export interface ISerializedQueryMap {
-  [key: string]: Omit<IQuery, 'responseTransformer' | 'query'> & {
-    responseTransformer: Operation<typeof responseTransformers>
-    query: Operation<typeof graphQLQueries>
-  }
-}
 export interface IQueryMap {
   [key: string]: IQuery
 }
@@ -849,79 +696,6 @@ export type IValidatorDescriptor =
   | ValidationFactoryOperation
   | ValidationDefaultOperation
 
-// Queries
-
-type QueryFactoryOperationKeys = FilterType<
-  typeof queries,
-  (...args: any[]) => (...args: any[]) => any
->[keyof typeof queries]
-
-type QueryDefaultOperationKeys = Exclude<
-  keyof typeof queries,
-  QueryFactoryOperationKeys
->
-
-export type QueryFactoryOperation<
-  T extends QueryFactoryOperationKeys = QueryFactoryOperationKeys
-> = {
-  operation: T
-  parameters: FunctionParamsToDescriptor<
-    Params<(typeof queries)[T]>,
-    IQueryDescriptor
-  >
-}
-
-type QueryDefaultOperation<
-  T extends QueryDefaultOperationKeys = QueryDefaultOperationKeys
-> = {
-  operation: T
-}
-
-export type IQueryDescriptor = QueryFactoryOperation | QueryDefaultOperation
-
-type ISimpleTemplateDescriptor = { fieldName: string }
-export type IQueryTemplateDescriptor = ISimpleTemplateDescriptor &
-  IQueryDescriptor
-export type ITemplateDescriptor =
-  | IQueryTemplateDescriptor
-  | ISimpleTemplateDescriptor
-// Mutations
-
-type MutationFactoryOperationKeys = FilterType<
-  typeof mutations,
-  (...args: any[]) => (...args: any[]) => any
->[keyof typeof mutations]
-
-type MutationDefaultOperationKeys = Exclude<
-  keyof typeof mutations,
-  MutationFactoryOperationKeys
->
-
-export type MutationFactoryOperation<
-  T extends MutationFactoryOperationKeys = MutationFactoryOperationKeys
-> = {
-  operation: T
-  parameters: FunctionParamsToDescriptor<
-    Params<(typeof mutations)[T]>,
-    IMutationDescriptor
-  >
-}
-
-type MutationDefaultOperation<
-  T extends MutationDefaultOperationKeys = MutationDefaultOperationKeys
-> = {
-  operation: T
-}
-
-export type IMutationDescriptor =
-  | MutationFactoryOperation
-  | MutationDefaultOperation
-
-export type X = FunctionParamsToDescriptor<
-  Params<(typeof mutations)['eventLocationMutationTransformer']>,
-  IMutationDescriptor
->
-
 // Initial type as it's always used as an object.
 // should be stricter than this
 export type TransformedData = { [key: string]: any }
@@ -1004,22 +778,6 @@ export interface IFormSection {
   mapping?: IFormSectionMapping
 }
 
-export type ISerializedFormSectionGroup = Omit<IFormSectionGroup, 'fields'> & {
-  fields: SerializedFormField[]
-}
-
-export type ISerializedFormSection = Omit<
-  IFormSection,
-  'groups' | 'mapping'
-> & {
-  groups: ISerializedFormSectionGroup[]
-  mapping?: {
-    mutation?: IMutationDescriptor
-    query?: IQueryDescriptor
-    template?: (IQueryDescriptor & { fieldName: string })[]
-  }
-}
-
 export interface IFormSectionGroup {
   id: string
   title?: MessageDescriptor
@@ -1034,9 +792,6 @@ export interface IFormSectionGroup {
 
 export interface IForm {
   sections: IFormSection[]
-}
-export interface ISerializedForm {
-  sections: ISerializedFormSection[]
 }
 
 export interface Ii18nSelectOption {

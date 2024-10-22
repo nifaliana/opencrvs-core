@@ -6,6 +6,7 @@ type Query {
     type: NotificationType = EMAIL
   ): NotificationResult
   fetchEvent(id: ID!): EventData
+  fetchEventForViewing(id: ID!): EventData
   fetchRegistrationCountByStatus(
     status: [String]!
     locationId: String
@@ -102,6 +103,7 @@ type Query {
     timeStart: String
     timeEnd: String
   ): UserAuditLogResultSet
+  getIndexedEvent(id: ID!): IndexedEvent!
   searchEvents(
     userId: String
     advancedSearchParameters: AdvancedSearchParametersInput!
@@ -215,6 +217,9 @@ type EventData {
   type: String!
   createdAt: String!
   actions: [Action!]!
+  duplicates: [ID!]!
+  attachments: [Attachment!]!
+  status: RegStatus!
 }
 
 type RegistrationCountResult {
@@ -351,6 +356,17 @@ type LocationWiseEstimationMetric {
 type UserAuditLogResultSet {
   total: Int!
   results: [UserAuditLogResultItem!]!
+}
+
+type IndexedEvent {
+  status: String!
+  id: ID!
+  type: String!
+  createdAt: Date!
+  createdAtLocation: String!
+  modifiedAt: String!
+  assignedTo: AssignmentData
+  duplicates: [ID!]!
 }
 
 type EventSearchResultSet {
@@ -584,6 +600,26 @@ type Action {
   fields: [Field!]!
 }
 
+type Attachment {
+  contentType: String!
+  uri: String!
+  description: String!
+}
+
+enum RegStatus {
+  IN_PROGRESS
+  ARCHIVED
+  DECLARED
+  DECLARATION_UPDATED
+  WAITING_VALIDATION
+  CORRECTION_REQUESTED
+  VALIDATED
+  REGISTERED
+  CERTIFIED
+  REJECTED
+  ISSUED
+}
+
 type StatusWiseRegistrationCount {
   status: String!
   count: Int!
@@ -723,14 +759,14 @@ union UserAuditLogResultItem =
     UserAuditLogItemWithComposition
   | UserAuditLogItem
 
-type IndexedEvent {
-  status: String!
-  id: ID!
-  type: String!
-  createdAt: Date!
-  createdAtLocation: String!
-  modifiedAt: String!
-  assignedTo: AssignmentData
+scalar Date
+
+type AssignmentData {
+  practitionerId: String!
+  firstName: String!
+  lastName: String!
+  officeName: String!
+  avatarURL: String!
 }
 
 enum SystemStatus {
@@ -810,20 +846,6 @@ input ActionsInput {
   fields: [FieldsInput!]!
 }
 
-enum RegStatus {
-  IN_PROGRESS
-  ARCHIVED
-  DECLARED
-  DECLARATION_UPDATED
-  WAITING_VALIDATION
-  CORRECTION_REQUESTED
-  VALIDATED
-  REGISTERED
-  CERTIFIED
-  REJECTED
-  ISSUED
-}
-
 input HumanNameInput {
   use: String
   firstNames: String
@@ -880,8 +902,6 @@ type Field {
   fieldId: String!
   value: String!
 }
-
-scalar Date
 
 type RoleLabel {
   lang: String!
@@ -989,14 +1009,6 @@ type UserAuditLogItem implements AuditLogItemBase {
   userAgent: String!
   action: String!
   practitionerId: String!
-}
-
-type AssignmentData {
-  practitionerId: String!
-  firstName: String!
-  lastName: String!
-  officeName: String!
-  avatarURL: String!
 }
 
 type WebhookPermission {

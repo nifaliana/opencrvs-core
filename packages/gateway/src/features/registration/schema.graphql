@@ -139,11 +139,21 @@ type IntegratedSystem {
   type: String
 }
 
+type Attachment {
+  contentType: String!
+  uri: String!
+  description: String!
+}
+
 type EventData {
   id: ID!
   type: String!
   createdAt: String!
   actions: [Action!]!
+  # Derived "easy to use" fields
+  duplicates: [ID!]!
+  attachments: [Attachment!]!
+  status: RegStatus!
 }
 type Field {
   fieldId: String!
@@ -192,32 +202,9 @@ input QuestionnaireQuestionInput {
   value: String
 }
 
-enum AttachmentInputStatus {
-  approved
-  validated
-  deleted
-}
-
 type QuestionnaireQuestion {
   fieldId: String
   value: String
-}
-
-type Attachment { # -> DocumentReference
-  id: ID! # uuid
-  _fhirID: ID # -> .id
-  contentType: String # -> .content.attachment.contentType
-  # base64
-  data: String # -> .content.attachment.data base64
-  uri: String
-  # approved/validated/deleted
-  status: String # -> .status
-  originalFileName: String # -> .identifier
-  systemFileName: String # -> .identifier
-  type: String # -> .type
-  description: String # -> use for other document type -> .description
-  subject: String # -> .subject (convert this to a reference to the person resoure in FHIR)
-  createdAt: Date # -> .created
 }
 
 type EventResultSet {
@@ -267,6 +254,7 @@ type Reinstated {
 
 type Query {
   fetchEvent(id: ID!): EventData
+  fetchEventForViewing(id: ID!): EventData
   fetchRegistrationCountByStatus(
     status: [String]!
     locationId: String

@@ -35,7 +35,6 @@ import {
   toggleEmailAllUsersFeedbackToast
 } from '@client/notification/actions'
 import { TOAST_MESSAGES } from '@client/user/userReducer'
-import { goToDeclarationRecordAudit } from '@client/navigation'
 import { withOnlineStatus } from '@client/views/OfficeHome/LoadingIndicator'
 
 type NotificationProps = ReturnType<typeof mapStateToProps> & {
@@ -56,7 +55,6 @@ type DispatchProps = {
   hideCreateUserFormDuplicateEmailErrorToast: typeof hideCreateUserFormDuplicateEmailErrorToast
   hideUnassignedDeclarationsToast: typeof hideUnassignedDeclarationsToast
   hideUserReconnectedToast: typeof hideUserReconnectedToast
-  goToDeclarationRecordAudit: typeof goToDeclarationRecordAudit
   toggleEmailAllUsersFeedbackToast: typeof toggleEmailAllUsersFeedbackToast
 }
 
@@ -79,7 +77,6 @@ const Component = ({
   hideCreateUserFormDuplicateEmailErrorToast,
   hideUnassignedDeclarationsToast,
   hideUserReconnectedToast,
-  goToDeclarationRecordAudit,
   toggleEmailAllUsersFeedbackToast,
   children,
   configurationError,
@@ -201,12 +198,14 @@ const Component = ({
                 underline
                 color="white"
                 element="button"
-                onClick={() =>
-                  hideDuplicateRecordsToast() &&
-                  goToDeclarationRecordAudit(
-                    'reviewTab',
-                    duplicateCompositionId
-                  )
+                onClick={
+                  () => hideDuplicateRecordsToast()
+                  // @todo
+                  // &&
+                  // goToDeclarationRecordAudit(
+                  //   'reviewTab',
+                  //   duplicateCompositionId
+                  // )
                 }
               >
                 {duplicateTrackingId}
@@ -329,7 +328,6 @@ export const NotificationComponent = withRouter(
     hideCreateUserErrorToast,
     hideCreateUserFormDuplicateEmailErrorToast,
     hideUserReconnectedToast,
-    goToDeclarationRecordAudit,
     hideUnassignedDeclarationsToast,
     toggleEmailAllUsersFeedbackToast
   })(injectIntl(withOnlineStatus(Component)))

@@ -8,56 +8,53 @@
  *
  * Copyright (C) The OpenCRVS Authors located at https://github.com/opencrvs/opencrvs-core/blob/master/AUTHORS.
  */
-import { App } from '@client/App'
-import { Event, SystemRoleType, Status } from '@client/utils/gateway'
-import { UserDetails } from '@client/utils/userUtils'
-import { getRegisterForm } from '@client/forms/register/declaration-selectors'
-import { getReviewForm } from '@client/forms/register/review-selectors'
-import { offlineDataReady, setOfflineData } from '@client/offline/actions'
-import { AppStore, createStore, IStoreState } from '@client/store'
-import { ThemeProvider } from 'styled-components'
-import { getSchema } from '@client/tests/graphql-schema-mock'
-import { I18nContainer } from '@opencrvs/client/src/i18n/components/I18nContainer'
-import { getTheme } from '@opencrvs/components/lib/theme'
-import { join } from 'path'
 import {
-  configure,
-  mount,
-  ReactWrapper,
-  shallow,
-  MountRendererProps
-} from 'enzyme'
-import Adapter from '@wojtekmaj/enzyme-adapter-react-17'
-import { readFileSync } from 'fs'
-import { graphql, print } from 'graphql'
-import * as jwt from 'jsonwebtoken'
-import * as React from 'react'
-import {
-  ApolloProvider,
-  NetworkStatus,
   ApolloClient,
-  InMemoryCache,
   ApolloLink,
+  ApolloProvider,
+  InMemoryCache,
+  NetworkStatus,
   Observable
 } from '@apollo/client'
 import { MockedProvider } from '@apollo/client/testing'
+import { App } from '@client/App'
+import { offlineDataReady } from '@client/offline/actions'
+import { AppStore, createStore, IStoreState } from '@client/store'
+import { getSchema } from '@client/tests/graphql-schema-mock'
+import { Event, Status, SystemRoleType } from '@client/utils/gateway'
+import { UserDetails } from '@client/utils/userUtils'
+import { I18nContainer } from '@opencrvs/client/src/i18n/components/I18nContainer'
+import { getTheme } from '@opencrvs/components/lib/theme'
+import Adapter from '@wojtekmaj/enzyme-adapter-react-17'
+import {
+  configure,
+  mount,
+  MountRendererProps,
+  ReactWrapper,
+  shallow
+} from 'enzyme'
+import { readFileSync } from 'fs'
+import { graphql, print } from 'graphql'
+import * as jwt from 'jsonwebtoken'
+import { join } from 'path'
+import * as React from 'react'
 import { IntlShape } from 'react-intl'
 import { Provider } from 'react-redux'
-import { AnyAction, Store } from 'redux'
-import { waitForElement } from './wait-for-element'
+import { ThemeProvider } from 'styled-components'
+
+import { Section } from '@client/forms'
 import { setUserDetails } from '@client/profile/profileActions'
+import { ConnectedRouter } from 'connected-react-router'
 import { createLocation, createMemoryHistory, History } from 'history'
 import { stringify } from 'query-string'
 import { match as Match } from 'react-router'
-import { ConnectedRouter } from 'connected-react-router'
 import { mockOfflineData } from './mock-offline-data'
-import { Section, SubmissionAction } from '@client/forms'
-import { SUBMISSION_STATUS } from '@client/declarations'
-import { vi } from 'vitest'
-import { getSystemRolesQuery } from '@client/forms/user/query/queries'
+import { waitForElement } from './wait-for-element'
+
 import { createOrUpdateUserMutation } from '@client/forms/user/mutation/mutations'
-import { draftToGqlTransformer } from '@client/transformer'
-import { deserializeFormSection } from '@client/forms/deserializer/deserializer'
+import { getSystemRolesQuery } from '@client/forms/user/query/queries'
+import { vi } from 'vitest'
+
 import * as builtInValidators from '@client/utils/validate'
 
 export const registerScopeToken =
@@ -72,26 +69,6 @@ export const inValidImageB64String =
   'wee7dfaKGgoAAAANSUhEUgAAAAgAAAACCAYAAABllJ3tAAAABHNCSVQICAgIfAhkiAAAABl0RVh0U29mdHdhcmUAZ25vbWUtc2NyZWVuc2hvdO8Dvz4AAAAXSURBVAiZY1RWVv7PgAcw4ZNkYGBgAABYyAFsic1CfAAAAABJRU5ErkJggg=='
 export const natlSysAdminToken =
   'Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzY29wZSI6WyJzeXNhZG1pbiIsIm5hdGxzeXNhZG1pbiIsImRlbW8iXSwiaWF0IjoxNjQ5NjU3MTM4LCJleHAiOjE2NTAyNjE5MzgsImF1ZCI6WyJvcGVuY3J2czphdXRoLXVzZXIiLCJvcGVuY3J2czp1c2VyLW1nbnQtdXNlciIsIm9wZW5jcnZzOmhlYXJ0aC11c2VyIiwib3BlbmNydnM6Z2F0ZXdheS11c2VyIiwib3BlbmNydnM6bm90aWZpY2F0aW9uLXVzZXIiLCJvcGVuY3J2czp3b3JrZmxvdy11c2VyIiwib3BlbmNydnM6c2VhcmNoLXVzZXIiLCJvcGVuY3J2czptZXRyaWNzLXVzZXIiLCJvcGVuY3J2czpjb3VudHJ5Y29uZmlnLXVzZXIiLCJvcGVuY3J2czp3ZWJob29rcy11c2VyIiwib3BlbmNydnM6Y29uZmlnLXVzZXIiXSwiaXNzIjoib3BlbmNydnM6YXV0aC1zZXJ2aWNlIiwic3ViIjoiNjIyZjgxYjQyY2Q1MzdiZjkxZGFhMTBiIn0.MojnxjSVja4VkS5ufVtpJHmiqQqngW3Zb6rHv4MqKwqSgHptjta1A-1xdpkfadxr0pVIYTh-rhKP93LPCTfThkA01oW8qgkUr0t_02cgJ5KLe1B3R5QFJ9i1IzLye9yOeakfpbtnk67cwJ2r4KTJMxj5BWucdPGK8ifZRBdDrt9HsTtcDOutgLmEp2VnxLvc2eAEmoBBp6mRZ8lOYIRei5UHfaROCk0vdwjLchiqQWH9GE8hxU3RIA1jpzshd3_TC4G0rvuIXnBGf9VQaH-gkNW7a44xLVHhdENxAsGTdyeSHRC83wbeoUZkuOFQpF8Iz-8SbLEQfmipdzeBAsBgWg'
-
-export const ACTION_STATUS_MAP = {
-  [SubmissionAction.SUBMIT_FOR_REVIEW]: SUBMISSION_STATUS.READY_TO_SUBMIT,
-  [SubmissionAction.APPROVE_DECLARATION]: SUBMISSION_STATUS.READY_TO_APPROVE,
-  [SubmissionAction.REGISTER_DECLARATION]: SUBMISSION_STATUS.READY_TO_REGISTER,
-  [SubmissionAction.REJECT_DECLARATION]: SUBMISSION_STATUS.READY_TO_REJECT,
-  [SubmissionAction.MAKE_CORRECTION]:
-    SUBMISSION_STATUS.READY_TO_REQUEST_CORRECTION,
-  [SubmissionAction.REQUEST_CORRECTION]:
-    SUBMISSION_STATUS.READY_TO_REQUEST_CORRECTION,
-  [SubmissionAction.ISSUE_DECLARATION]: SUBMISSION_STATUS.READY_TO_ISSUE,
-  [SubmissionAction.CERTIFY_AND_ISSUE_DECLARATION]:
-    SUBMISSION_STATUS.READY_TO_CERTIFY,
-  [SubmissionAction.CERTIFY_DECLARATION]: SUBMISSION_STATUS.READY_TO_CERTIFY,
-  [SubmissionAction.ARCHIVE_DECLARATION]: SUBMISSION_STATUS.READY_TO_ARCHIVE,
-  [SubmissionAction.APPROVE_CORRECTION]:
-    SUBMISSION_STATUS.READY_TO_REQUEST_CORRECTION,
-  [SubmissionAction.REJECT_CORRECTION]:
-    SUBMISSION_STATUS.READY_TO_REQUEST_CORRECTION
-} as const
 
 export const validateScopeToken = jwt.sign(
   { scope: ['validate'] },
@@ -961,24 +938,6 @@ export async function goToMotherSection(component: ReactWrapper) {
   await waitForElement(component, '#form_section_id_mother-view-group')
 }
 
-export async function getRegisterFormFromStore(
-  store: Store<IStoreState, AnyAction>,
-  event: Event
-) {
-  await store.dispatch(setOfflineData(userDetails))
-  const state = store.getState()
-  return getRegisterForm(state)[event]
-}
-
-export async function getReviewFormFromStore(
-  store: Store<IStoreState, AnyAction>,
-  event: Event
-) {
-  await store.dispatch(setOfflineData(userDetails))
-  const state = store.getState()
-  return getReviewForm(state)![event]
-}
-
 export function setPageVisibility(isVisible: boolean) {
   // @ts-ignore
   document.hidden = !isVisible
@@ -1456,337 +1415,6 @@ export const mockCompleteFormData = {
   role: 'HOSPITAL',
   userDetails: '',
   username: ''
-}
-
-export const mockUserGraphqlOperation = {
-  request: {
-    query: createOrUpdateUserMutation,
-    variables: draftToGqlTransformer(
-      {
-        sections: [
-          deserializeFormSection(
-            {
-              id: 'user' as Section,
-              viewType: 'form',
-              name: {
-                defaultMessage: 'User',
-                description: 'The name of the user form',
-                id: 'constants.user'
-              },
-              title: {
-                defaultMessage: 'Create new user',
-                description: 'The title of user form',
-                id: 'form.section.user.title'
-              },
-              groups: [
-                {
-                  id: 'registration-office',
-                  title: {
-                    defaultMessage: 'Assigned Registration Office',
-                    description: 'Assigned Registration Office section',
-                    id: 'form.section.assignedRegistrationOffice'
-                  },
-                  conditionals: [
-                    {
-                      action: 'hide',
-                      expression:
-                        'values.skippedOfficeSelction && values.registrationOffice'
-                    }
-                  ],
-                  fields: [
-                    {
-                      name: 'assignedRegistrationOffice',
-                      type: 'FIELD_GROUP_TITLE',
-                      label: {
-                        defaultMessage: 'Assigned registration office',
-                        description: 'Assigned Registration Office section',
-                        id: 'form.section.assignedRegistrationOfficeGroupTitle'
-                      },
-                      required: false,
-                      hidden: true,
-                      initialValue: '',
-                      validator: []
-                    },
-                    {
-                      name: 'registrationOffice',
-                      type: 'LOCATION_SEARCH_INPUT',
-                      label: {
-                        defaultMessage: 'Registration Office',
-                        description: 'Registration office',
-                        id: 'form.field.label.registrationOffice'
-                      },
-                      required: true,
-                      initialValue: '',
-                      searchableResource: ['facilities'],
-                      searchableType: ['CRVS_OFFICE'],
-                      locationList: [],
-                      validator: [
-                        {
-                          operation: 'officeMustBeSelected'
-                        }
-                      ],
-                      mapping: {
-                        mutation: {
-                          operation: 'fieldNameTransformer',
-                          parameters: ['primaryOffice']
-                        },
-                        query: {
-                          operation: 'locationIDToFieldTransformer',
-                          parameters: ['primaryOffice']
-                        }
-                      }
-                    }
-                  ]
-                },
-                {
-                  id: 'user-view-group',
-                  fields: [
-                    {
-                      name: 'userDetails',
-                      type: 'FIELD_GROUP_TITLE',
-                      label: {
-                        defaultMessage: 'User details',
-                        description: 'User details section',
-                        id: 'form.section.userDetails'
-                      },
-                      required: false,
-                      initialValue: '',
-                      validator: []
-                    },
-                    {
-                      name: 'firstNames',
-                      type: 'TEXT',
-                      label: {
-                        defaultMessage: 'Bengali first name',
-                        description: 'Bengali first name',
-                        id: 'form.field.label.firstNameBN'
-                      },
-                      required: false,
-                      initialValue: '',
-                      validator: [{ operation: 'bengaliOnlyNameFormat' }],
-                      mapping: {
-                        mutation: {
-                          operation: 'fieldToNameTransformer',
-                          parameters: ['bn']
-                        },
-                        query: {
-                          operation: 'nameToFieldTransformer',
-                          parameters: ['bn']
-                        }
-                      }
-                    },
-                    {
-                      name: 'familyName',
-                      type: 'TEXT',
-                      label: {
-                        defaultMessage: 'Bengali last name',
-                        description: 'Bengali last name',
-                        id: 'form.field.label.lastNameBN'
-                      },
-                      required: true,
-                      initialValue: '',
-                      validator: [{ operation: 'bengaliOnlyNameFormat' }],
-                      mapping: {
-                        mutation: {
-                          operation: 'fieldToNameTransformer',
-                          parameters: ['bn']
-                        },
-                        query: {
-                          operation: 'nameToFieldTransformer',
-                          parameters: ['bn']
-                        }
-                      }
-                    },
-                    {
-                      name: 'firstNames',
-                      type: 'TEXT',
-                      label: {
-                        defaultMessage: 'English first name',
-                        description: 'English first name',
-                        id: 'form.field.label.firstNameEN'
-                      },
-                      required: false,
-                      initialValue: '',
-                      validator: [{ operation: 'englishOnlyNameFormat' }],
-                      mapping: {
-                        mutation: {
-                          operation: 'fieldToNameTransformer',
-                          parameters: ['en', 'firstNames']
-                        },
-                        query: {
-                          operation: 'nameToFieldTransformer',
-                          parameters: ['en', 'firstNames']
-                        }
-                      }
-                    },
-                    {
-                      name: 'familyName',
-                      type: 'TEXT',
-                      label: {
-                        defaultMessage: 'English last name',
-                        description: 'English last name',
-                        id: 'form.field.label.userSurname'
-                      },
-                      required: true,
-                      initialValue: '',
-                      validator: [{ operation: 'englishOnlyNameFormat' }],
-                      mapping: {
-                        mutation: {
-                          operation: 'fieldToNameTransformer',
-                          parameters: ['en', 'familyName']
-                        },
-                        query: {
-                          operation: 'nameToFieldTransformer',
-                          parameters: ['en', 'familyName']
-                        }
-                      }
-                    },
-                    {
-                      name: 'phoneNumber',
-                      type: 'TEXT',
-                      label: {
-                        defaultMessage: 'Phone number',
-                        description: 'Input label for phone input',
-                        id: 'form.field.label.phoneNumber'
-                      },
-                      required: true,
-                      initialValue: '',
-                      validator: [{ operation: 'phoneNumberFormat' }],
-                      mapping: {
-                        mutation: {
-                          operation: 'msisdnTransformer',
-                          parameters: ['user.mobile']
-                        },
-                        query: {
-                          operation: 'localPhoneTransformer',
-                          parameters: ['user.mobile']
-                        }
-                      }
-                    },
-                    {
-                      name: 'accountDetails',
-                      type: 'FIELD_GROUP_TITLE',
-                      label: {
-                        defaultMessage: 'Account details',
-                        description: 'Account details section',
-                        id: 'form.section.accountDetails'
-                      },
-                      required: false,
-                      initialValue: '',
-                      validator: []
-                    },
-                    {
-                      name: 'systemRole',
-                      type: 'SELECT_WITH_OPTIONS',
-                      label: {
-                        defaultMessage: 'Role',
-                        description: 'Role label',
-                        id: 'constants.role'
-                      },
-                      required: true,
-                      initialValue: '',
-                      validator: [],
-                      options: []
-                    },
-                    {
-                      name: 'role',
-                      type: 'SELECT_WITH_DYNAMIC_OPTIONS',
-                      label: {
-                        defaultMessage: 'Type',
-                        description:
-                          'Label for type of event in work queue list item',
-                        id: 'constants.type'
-                      },
-                      required: true,
-                      initialValue: '',
-                      validator: [],
-                      dynamicOptions: {
-                        dependency: 'systemRole',
-                        options: {}
-                      }
-                    },
-                    {
-                      name: 'device',
-                      type: 'TEXT',
-                      label: {
-                        defaultMessage: 'Device',
-                        description: 'User device',
-                        id: 'form.field.label.userDevice'
-                      },
-                      required: false,
-                      initialValue: '',
-                      validator: []
-                    }
-                  ]
-                },
-                {
-                  id: 'signature-attachment',
-                  title: {
-                    defaultMessage: 'Attach the signature',
-                    description: 'Title for user signature attachment',
-                    id: 'form.field.label.userSignatureAttachmentTitle'
-                  },
-                  conditionals: [
-                    {
-                      action: 'hide',
-                      expression:
-                        'values.systemRole!=="LOCAL_REGISTRAR" && values.systemRole!=="REGISTRATION_AGENT"'
-                    }
-                  ],
-                  fields: [
-                    {
-                      name: 'attachmentTitle',
-                      type: 'FIELD_GROUP_TITLE',
-                      hidden: true,
-                      label: {
-                        defaultMessage: 'Attachments',
-                        description: 'label for user signature attachment',
-                        id: 'form.field.label.userAttachmentSection'
-                      },
-                      required: false,
-                      initialValue: '',
-                      validator: []
-                    },
-                    {
-                      name: 'signature',
-                      type: 'SIMPLE_DOCUMENT_UPLOADER',
-                      label: {
-                        defaultMessage: 'User’s signature',
-                        description:
-                          'Input label for user signature attachment',
-                        id: 'form.field.label.userSignatureAttachment'
-                      },
-                      description: {
-                        defaultMessage:
-                          'Ask the user to sign a piece of paper and then scan or take a photo.',
-                        description:
-                          'Description for user signature attachment',
-                        id: 'form.field.label.userSignatureAttachmentDesc'
-                      },
-                      allowedDocType: ['image/png'],
-                      initialValue: '',
-                      required: false,
-                      validator: []
-                    }
-                  ]
-                }
-              ]
-            },
-            builtInValidators as any
-          )
-        ]
-      },
-      { user: mockCompleteFormData },
-      '',
-      userDetails,
-      mockOfflineData
-    )
-  },
-  result: {
-    data: {
-      createOrUpdateUserMutation: { username: 'hossain123', __typename: 'User' }
-    }
-  }
 }
 
 export const mockDataWithRegistarRoleSelected = {

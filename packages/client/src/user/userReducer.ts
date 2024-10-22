@@ -8,15 +8,7 @@
  *
  * Copyright (C) The OpenCRVS Authors located at https://github.com/opencrvs/opencrvs-core/blob/master/AUTHORS.
  */
-import {
-  IForm,
-  IFormSection,
-  IFormSectionData,
-  ISelectFormFieldWithOptions,
-  ISelectOption,
-  UserSection
-} from '@client/forms'
-import { deserializeForm } from '@client/forms/deserializer/deserializer'
+import { IForm, IFormSectionData, ISelectOption } from '@client/forms'
 import { goToTeamUserList } from '@client/navigation'
 import {
   ShowCreateUserDuplicateEmailErrorToast,
@@ -34,14 +26,12 @@ import { ApolloClient, ApolloError, ApolloQueryResult } from '@apollo/client'
 import { Action } from 'redux'
 import { ActionCmd, Cmd, Loop, loop, LoopReducer, RunCmd } from 'redux-loop'
 import { IUserAuditForm, userAuditForm } from '@client/user/user-audit'
-import { getCreateUserForm } from '@client/forms/user/fieldDefinitions/createUser'
 import { getToken, getTokenPayload } from '@client/utils/authUtils'
 import { roleQueries } from '@client/forms/user/query/queries'
 import { Role, SystemRole } from '@client/utils/gateway'
 import type { GQLQuery } from '@client/utils/gateway-deprecated-do-not-use'
-import { gqlToDraftTransformer } from '@client/transformer'
+
 import { getUserRoleIntlKey } from '@client/views/SysAdmin/Team/utils'
-import { validators } from '@client/forms/validators'
 
 export const ROLES_LOADED = 'USER_FORM/ROLES_LOADED'
 const MODIFY_USER_FORM_DATA = 'USER_FORM/MODIFY_USER_FORM_DATA'
@@ -60,8 +50,6 @@ export enum TOAST_MESSAGES {
 }
 
 const initialState: IUserFormState = {
-  userForm: deserializeForm(getCreateUserForm(), validators),
-  userFormData: {},
   userDetailsStored: false,
   submitting: false,
   loadingRoles: false,
@@ -249,8 +237,6 @@ export interface ISystemRolesMap {
   [key: string]: string
 }
 export interface IUserFormState {
-  userForm: IForm
-  userFormData: IFormSectionData
   userDetailsStored: boolean
   submitting: boolean
   loadingRoles: boolean
@@ -289,30 +275,6 @@ const generateIntlObject = (
   }
 }
 
-const optionsGenerator = (systemRoles: SystemRole[]) => {
-  const typeList: ISelectOption[] = []
-  systemRoles.forEach((systemRole: SystemRole) => {
-    systemRole.roles.forEach((role: Role) => {
-      typeList.push(generateIntlObject(systemRole, role))
-    })
-  })
-
-  return typeList
-}
-
-const generateUserFormWithRoles = (
-  form: IForm,
-  mutateOptions: ISelectOption[]
-) => {
-  const section = form.sections.find((section) => section.id === 'user')!
-  const group = section.groups.find((group) => group.id === 'user-view-group')!
-  const field = group.fields.find(
-    (field) => field.name === 'role'
-  ) as ISelectFormFieldWithOptions
-
-  field.options = mutateOptions
-}
-
 export const userFormReducer: LoopReducer<IUserFormState, UserFormAction> = (
   state: IUserFormState = initialState,
   action: UserFormAction | offlineActions.Action
@@ -331,17 +293,12 @@ export const userFormReducer: LoopReducer<IUserFormState, UserFormAction> = (
       )
 
     case MODIFY_USER_FORM_DATA:
-      return {
-        ...state,
-        userFormData: (action as IUserFormDataModifyAction).payload.data
-      }
+      // @todo
+      return state
 
     case CLEAR_USER_FORM_DATA:
-      return {
-        ...initialState,
-        userForm: state.userForm,
-        systemRoleMap: state.systemRoleMap
-      }
+      // @todo
+      return state
 
     case SUBMIT_USER_FORM_DATA:
       const { client, mutation, variables, officeLocationId, isUpdate } = (
@@ -436,15 +393,12 @@ export const userFormReducer: LoopReducer<IUserFormState, UserFormAction> = (
     case ROLES_LOADED:
       const { systemRoles } = action.payload
       const getSystemRoleMap = getRoleWiseSystemRoles(systemRoles)
-      const form = deserializeForm(getCreateUserForm(), validators)
-      const mutateOptions = optionsGenerator(systemRoles)
 
-      generateUserFormWithRoles(form, mutateOptions)
       return {
         ...state,
-        userForm: {
-          ...form
-        },
+        // userForm: {
+        /* @todo */
+        // },
         systemRoleMap: getSystemRoleMap
       }
     case FETCH_USER_DATA:
@@ -471,14 +425,10 @@ export const userFormReducer: LoopReducer<IUserFormState, UserFormAction> = (
       )
 
     case STORE_USER_FORM_DATA:
-      const { queryData } = (action as IStoreUserFormDataAction).payload
-      const formData = gqlToDraftTransformer(
-        { sections: (state.userForm as IForm).sections as IFormSection[] },
-        { [UserSection.User]: queryData.data.getUser }
-      )
+      /* @todo */
       return {
         ...state,
-        userFormData: formData.user,
+        // userFormData: formData.user,
         userDetailsStored: true
       }
     case ROLE_MESSAGES_LOADED:

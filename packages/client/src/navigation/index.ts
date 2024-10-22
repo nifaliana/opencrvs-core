@@ -16,7 +16,6 @@ import {
   CREATE_USER,
   CREATE_USER_ON_LOCATION,
   CREATE_USER_SECTION,
-  DRAFT_DEATH_FORM,
   EVENT_COMPLETENESS_RATES,
   HOME,
   PERFORMANCE_FIELD_AGENT_LIST,
@@ -52,8 +51,7 @@ import {
   ISSUE_COLLECTOR,
   ISSUE_VERIFY_COLLECTOR,
   ISSUE_CERTIFICATE_PAYMENT,
-  DRAFT_BIRTH_PARENT_FORM,
-  DRAFT_MARRIAGE_FORM,
+  DRAFT_FORM,
   ALL_USER_EMAIL,
   PRINT_RECORD
 } from '@client/navigation/routes'
@@ -75,7 +73,6 @@ import {
 } from 'connected-react-router'
 import { stringify } from 'query-string'
 import { Cmd, loop } from 'redux-loop'
-import { IRecordAuditTabs } from '@client/views/RecordAudit/RecordAudit'
 import { IWORKQUEUE_TABS } from '@client/components/interface/Navigation'
 import startOfMonth from 'date-fns/startOfMonth'
 import subMonths from 'date-fns/subMonths'
@@ -123,22 +120,6 @@ type GoToUserProfile = {
 }
 
 export type Action = GoToPageAction | GoToReviewUserDetails | GoToUserProfile
-
-export function goToDeathInformant(declarationId: string) {
-  return push(
-    formatUrl(DRAFT_DEATH_FORM, {
-      declarationId: declarationId.toString()
-    })
-  )
-}
-
-export function goToMarriageInformant(declarationId: string) {
-  return push(
-    formatUrl(DRAFT_MARRIAGE_FORM, {
-      declarationId: declarationId.toString()
-    })
-  )
-}
 
 export function goToEvents() {
   return push(SELECT_VITAL_EVENT)
@@ -276,17 +257,10 @@ export function goToSearch() {
   return push(SEARCH)
 }
 
-export function goToDeclarationRecordAudit(
-  tab: IRecordAuditTabs,
-  declarationId: string
-) {
-  return push(formatUrl(DECLARATION_RECORD_AUDIT, { tab, declarationId }))
-}
-
-export function goToBirthRegistrationAsParent(declarationId: string) {
+export function goToForm(eventId: string) {
   return push(
-    formatUrl(DRAFT_BIRTH_PARENT_FORM, {
-      declarationId: declarationId.toString()
+    formatUrl(DRAFT_FORM, {
+      declarationId: eventId
     })
   )
 }
@@ -405,12 +379,6 @@ export function goToIssueCertificatePayment(
       registrationId: registrationId.toString(),
       eventType: event
     })
-  )
-}
-
-export function goToDeathRegistration(declarationId: string) {
-  return push(
-    formatUrl(DRAFT_DEATH_FORM, { declarationId: declarationId.toString() })
   )
 }
 

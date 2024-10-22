@@ -8,9 +8,9 @@
  *
  * Copyright (C) The OpenCRVS Authors located at https://github.com/opencrvs/opencrvs-core/blob/master/AUTHORS.
  */
-import { GenericErrorToast } from '@client/components/GenericErrorToast'
+
 import { LocationPicker } from '@client/components/LocationPicker'
-import { Query } from '@client/components/Query'
+
 import { formatTimeDuration } from '@client/DateUtils'
 import { Event, RegStatus } from '@client/utils/gateway'
 import {
@@ -22,8 +22,7 @@ import { messages } from '@client/i18n/messages/views/performance'
 import {
   goToPerformanceHome,
   goToWorkflowStatus,
-  goToSearchResult,
-  goToDeclarationRecordAudit
+  goToSearchResult
 } from '@client/navigation'
 import { LANG_EN } from '@client/utils/constants'
 import { createNamesMap } from '@client/utils/data-formatting'
@@ -190,14 +189,13 @@ interface DispatchProps {
   goToPerformanceHome: typeof goToPerformanceHome
   goToWorkflowStatus: typeof goToWorkflowStatus
   goToSearchResult: typeof goToSearchResult
-  goToDeclarationRecordAudit: typeof goToDeclarationRecordAudit
 }
 interface ISearchParams {
   locationId: string
   status?: keyof IStatusMapping
   event?: Event
 }
-export interface IHistoryStateProps {
+interface IHistoryStateProps {
   timeStart: Date | string
   timeEnd: Date | string
 }
@@ -644,12 +642,9 @@ function WorkflowStatusComponent(props: WorkflowStatusProps) {
         ...row,
         id: (
           <LinkButton
-            onClick={() =>
-              props.goToDeclarationRecordAudit(
-                'printTab',
-                row.compositionId as string
-              )
-            }
+            onClick={() => {
+              /*@todo */
+            }}
           >
             {row.id}
           </LinkButton>
@@ -785,6 +780,5 @@ function WorkflowStatusComponent(props: WorkflowStatusProps) {
 export const WorkflowStatus = connect(null, {
   goToPerformanceHome,
   goToSearchResult,
-  goToDeclarationRecordAudit,
   goToWorkflowStatus
 })(injectIntl(WorkflowStatusComponent))

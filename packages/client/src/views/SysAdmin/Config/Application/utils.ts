@@ -12,13 +12,6 @@
 import { lookup } from 'country-data'
 import { ICurrency } from '@client/utils/referenceApi'
 
-export enum NOTIFICATION_STATUS {
-  SUCCESS = 'success',
-  IDLE = 'idle',
-  IN_PROGRESS = 'inProgress',
-  ERROR = 'error'
-}
-
 export const getAmountWithCurrencySymbol = (
   currency: ICurrency,
   amount: number

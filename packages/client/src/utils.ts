@@ -10,9 +10,14 @@
  */
 import { storage } from '@client/storage'
 import { APPLICATION_VERSION, LANG_EN } from '@client/utils/constants'
-import { IUserData } from '@client/declarations'
+
 import React from 'react'
 import { GetSystemRolesQuery, Role } from '@client/utils/gateway'
+
+interface IUserData {
+  userID: string
+  userPIN?: string
+}
 
 export async function validateApplicationVersion() {
   const runningVer = localStorage.getItem('running-version')
@@ -23,10 +28,6 @@ export async function validateApplicationVersion() {
     const allUserData: IUserData[] = !userData
       ? []
       : (JSON.parse(userData) as IUserData[])
-
-    allUserData.forEach((userData) => {
-      userData['declarations'] = []
-    })
 
     await storage.setItem('USER_DATA', JSON.stringify(allUserData))
   }

@@ -23,7 +23,7 @@ import { LANG_EN } from '@client/utils/constants'
 import { IUserAuditForm } from '@client/user/user-audit'
 import { IStoreState } from '@client/store'
 import { connect, useSelector } from 'react-redux'
-import { FormFieldGenerator } from '@client/components/form'
+
 import styled from 'styled-components'
 import { IFormSectionData } from '@client/forms'
 import { hasFormError } from '@client/forms/utils'
@@ -230,13 +230,7 @@ function UserAuditActionModalComponent(
       {formError && isErrorVisible && (
         <ErrorText id="form-error">{formError}</ErrorText>
       )}
-      <FormFieldGenerator
-        id="user-audit-form"
-        fields={form?.fields ?? []}
-        onChange={(values) => setFormValues({ ...formValues, ...values })}
-        setAllFieldsDirty={false}
-        draftData={{ formValues }}
-      />
+      {/* @todo */}
     </ResponsiveModal>
   )
 }

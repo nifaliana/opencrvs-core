@@ -8,28 +8,19 @@
  *
  * Copyright (C) The OpenCRVS Authors located at https://github.com/opencrvs/opencrvs-core/blob/master/AUTHORS.
  */
-import { Event } from '@client/utils/gateway'
 
 export const HOME = '/'
 export const SELECT_VITAL_EVENT = '/events'
 
-export const DRAFT_BIRTH_PARENT_FORM = `/drafts/:declarationId/events/${Event.Birth}`
-export const DRAFT_BIRTH_PARENT_FORM_PAGE = `/drafts/:declarationId/events/${Event.Birth}/:pageId`
-export const DRAFT_BIRTH_PARENT_FORM_PAGE_GROUP = `/drafts/:declarationId/events/${Event.Birth}/:pageId/group/:groupId`
-export const SELECT_DEATH_INFORMANT = `/drafts/:declarationId/events/${Event.Death}/registration/informantType`
-export const DRAFT_DEATH_FORM = `/drafts/:declarationId/events/${Event.Death}`
-export const DRAFT_DEATH_FORM_PAGE = `/drafts/:declarationId/events/${Event.Death}/:pageId`
-export const DRAFT_DEATH_FORM_PAGE_GROUP = `/drafts/:declarationId/events/${Event.Death}/:pageId/group/:groupId`
-export const SELECT_MARRIAGE_INFORMANT = `/drafts/:declarationId/events/${Event.Marriage}/registration/informantType`
-export const DRAFT_MARRIAGE_FORM = `/drafts/:declarationId/events/${Event.Marriage}`
-export const DRAFT_MARRIAGE_FORM_PAGE = `/drafts/:declarationId/events/${Event.Marriage}/:pageId`
-export const DRAFT_MARRIAGE_FORM_PAGE_GROUP = `/drafts/:declarationId/events/${Event.Marriage}/:pageId/group/:groupId`
+export const DRAFT_FORM = `/drafts/:declarationId`
+export const DRAFT_FORM_PAGE = `/drafts/:declarationId/:pageId`
+export const DRAFT_FORM_PAGE_GROUP = `/drafts/:declarationId/:pageId/group/:groupId`
 
 export const REVIEW_EVENT_PARENT_FORM_PAGE =
-  '/reviews/:declarationId/events/:event/parent/:pageId'
+  '/reviews/:declarationId/parent/:pageId'
 
 export const REVIEW_EVENT_PARENT_FORM_PAGE_GROUP =
-  '/reviews/:declarationId/events/:event/parent/:pageId/group/:groupId'
+  '/reviews/:declarationId/parent/:pageId/group/:groupId'
 
 export const REVIEW_CORRECTION = '/review-correction/:declarationId'
 

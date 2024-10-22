@@ -27,6 +27,7 @@ type IndexedEvent {
   createdAtLocation: String!
   modifiedAt: String!
   assignedTo: AssignmentData
+  duplicates: [ID!]!
 }
 
 input SortBy {
@@ -35,6 +36,7 @@ input SortBy {
 }
 
 type Query {
+  getIndexedEvent(id: ID!): IndexedEvent!
   searchEvents(
     userId: String
     advancedSearchParameters: AdvancedSearchParametersInput!

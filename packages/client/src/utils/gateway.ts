@@ -250,6 +250,13 @@ export type AssignmentData = {
   practitionerId: Scalars['String']
 }
 
+export type Attachment = {
+  __typename?: 'Attachment'
+  contentType: Scalars['String']
+  description: Scalars['String']
+  uri: Scalars['String']
+}
+
 export type AttachmentInput = {
   _fhirID?: InputMaybe<Scalars['ID']>
   contentType?: InputMaybe<Scalars['String']>
@@ -415,8 +422,11 @@ export enum Event {
 export type EventData = {
   __typename?: 'EventData'
   actions: Array<Action>
+  attachments: Array<Attachment>
   createdAt: Scalars['String']
+  duplicates: Array<Scalars['ID']>
   id: Scalars['ID']
+  status: RegStatus
   type: Scalars['String']
 }
 
@@ -509,6 +519,7 @@ export type IndexedEvent = {
   assignedTo?: Maybe<AssignmentData>
   createdAt: Scalars['Date']
   createdAtLocation: Scalars['String']
+  duplicates: Array<Scalars['ID']>
   id: Scalars['ID']
   modifiedAt: Scalars['String']
   status: Scalars['String']
@@ -842,12 +853,14 @@ export enum PaymentType {
 export type Query = {
   __typename?: 'Query'
   fetchEvent?: Maybe<EventData>
+  fetchEventForViewing?: Maybe<EventData>
   fetchLocationWiseEventMetrics?: Maybe<Array<LocationWiseEstimationMetric>>
   fetchMonthWiseEventMetrics?: Maybe<Array<MonthWiseEstimationMetric>>
   fetchRecordDetailsForVerification?: Maybe<EventData>
   fetchRegistrationCountByStatus?: Maybe<RegistrationCountResult>
   fetchSystem?: Maybe<System>
   getDeclarationsStartedMetrics?: Maybe<DeclarationsStartedMetrics>
+  getIndexedEvent: IndexedEvent
   getLocationStatistics?: Maybe<LocationStatisticsResponse>
   getRegistrationsListByFilter?: Maybe<MixedTotalMetricsResult>
   getSystemRoles?: Maybe<Array<SystemRole>>
@@ -869,6 +882,10 @@ export type Query = {
 }
 
 export type QueryFetchEventArgs = {
+  id: Scalars['ID']
+}
+
+export type QueryFetchEventForViewingArgs = {
   id: Scalars['ID']
 }
 
@@ -904,6 +921,10 @@ export type QueryGetDeclarationsStartedMetricsArgs = {
   locationId: Scalars['String']
   timeEnd: Scalars['String']
   timeStart: Scalars['String']
+}
+
+export type QueryGetIndexedEventArgs = {
+  id: Scalars['ID']
 }
 
 export type QueryGetLocationStatisticsArgs = {
@@ -2460,14 +2481,18 @@ export type FetchDeclarationShortInfoQueryVariables = Exact<{
 
 export type FetchDeclarationShortInfoQuery = {
   __typename?: 'Query'
-  fetchEvent?: {
-    __typename?: 'EventData'
+  getIndexedEvent: {
+    __typename?: 'IndexedEvent'
     id: string
-    actions: Array<{
-      __typename?: 'Action'
-      fields: Array<{ __typename?: 'Field'; fieldId: string; value: string }>
-    }>
-  } | null
+    assignedTo?: {
+      __typename?: 'AssignmentData'
+      avatarURL: string
+      firstName: string
+      lastName: string
+      officeName: string
+      practitionerId: string
+    } | null
+  }
 }
 
 export type ChangeAvatarMutationVariables = Exact<{
@@ -3030,12 +3055,17 @@ export type FetchViewRecordByCompositionQueryVariables = Exact<{
 
 export type FetchViewRecordByCompositionQuery = {
   __typename?: 'Query'
-  fetchEvent?: {
+  fetchEventForViewing?: {
     __typename?: 'EventData'
     id: string
     actions: Array<{
       __typename?: 'Action'
       fields: Array<{ __typename?: 'Field'; fieldId: string; value: string }>
+    }>
+    attachments: Array<{
+      __typename?: 'Attachment'
+      uri: string
+      description: string
     }>
   } | null
 }

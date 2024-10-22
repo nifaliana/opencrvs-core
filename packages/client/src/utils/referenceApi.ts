@@ -8,7 +8,7 @@
  *
  * Copyright (C) The OpenCRVS Authors located at https://github.com/opencrvs/opencrvs-core/blob/master/AUTHORS.
  */
-import { ISerializedForm } from '@client/forms'
+
 import { Conditional } from '@client/forms/conditionals'
 import { ILanguage } from '@client/i18n/reducer'
 import {
@@ -21,6 +21,7 @@ import { getToken } from '@client/utils/authUtils'
 import { Event, System } from '@client/utils/gateway'
 import { Validator } from '@client/forms/validators'
 import { IntlShape } from 'react-intl'
+import Handlebars from 'handlebars'
 
 export interface ILocationDataResponse {
   [locationId: string]: AdminStructure
@@ -62,9 +63,6 @@ export interface IContentResponse {
 export interface LoadFormsResponse {
   forms: {
     version: string
-    birth: ISerializedForm
-    death: ISerializedForm
-    marriage: ISerializedForm
   }
 }
 

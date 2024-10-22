@@ -10,8 +10,9 @@
  */
 import { Validation } from '@client/utils/validate'
 import { referenceApi } from '@client/utils/referenceApi'
-import { AnyFn } from '@client/forms/deserializer/deserializer'
 import * as builtInValidators from '@client/utils/validate'
+
+type AnyFn<T> = (...args: any[]) => T
 
 export type Validator = Validation | AnyFn<Validation>
 export let validators: Record<string, Validator> = builtInValidators as Record<
