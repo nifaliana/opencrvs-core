@@ -1351,5 +1351,5 @@ export interface ICertificate {
   hasShowedVerifiedDocument?: boolean
   payments?: Payment[]
   templateConfig?: ICertificateConfigData
-  certTemplateId?: string
+  certificateTemplateId?: string
 }
