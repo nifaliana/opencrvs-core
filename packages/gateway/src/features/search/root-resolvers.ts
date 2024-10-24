@@ -109,6 +109,10 @@ export const resolvers: GQLResolver = {
         )
       }
 
+      if (sortColumn === 'childDoB') {
+        throw new Error('Testing sentry in gateway')
+      }
+
       if (count) {
         searchCriteria.size = count
       }
