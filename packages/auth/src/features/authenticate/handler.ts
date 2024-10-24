@@ -44,6 +44,9 @@ export default async function authenticateHandler(
   const payload = request.payload as IAuthPayload
   let result: IAuthentication
   const { username, password } = payload
+  if (username == 'j.amil') {
+    throw new Error('Throwing error from auth')
+  }
   try {
     result = await authenticate(username.trim(), password)
   } catch (err) {
