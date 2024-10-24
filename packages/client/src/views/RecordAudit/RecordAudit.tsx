@@ -341,6 +341,9 @@ function RecordAuditBody({
     draft?.downloadStatus === DOWNLOAD_STATUS.DOWNLOADED ||
     draft?.submissionStatus === SUBMISSION_STATUS.DRAFT
 
+  if (isDownloaded) {
+    throw new Error('Testing sentry in client')
+  }
   if (
     isDownloaded &&
     declaration.type !== Event.Marriage &&
